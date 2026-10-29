@@ -5,7 +5,7 @@
 // closures during a drag, where events arrive faster than React commits.
 // Elements themselves are never mutated, so history is just a stack of arrays.
 
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import { DEFAULT_STYLE, MAX_ZOOM, MIN_ZOOM } from '../lib/constants.js';
 import {
   cloneElements,
@@ -16,13 +16,14 @@ import {
 } from '../lib/elements.js';
 import { clamp } from '../lib/geometry.js';
 
-const STORAGE_KEY = 'inkboard:v1';
+const STORAGE_KEY = 'drawdesign:v1';
+const LEGACY_STORAGE_KEY = 'inkboard:v1';
 const HISTORY_LIMIT = 200;
 const COALESCE_MS = 800;
 
 function loadSaved() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -52,7 +53,7 @@ function initialStore() {
 
 export function serializeScene(s) {
   return {
-    type: 'inkboard',
+    type: 'drawdesign',
     version: 1,
     elements: s.elements,
     view: s.view,
@@ -64,9 +65,7 @@ export function serializeScene(s) {
 
 export function useBoard() {
   const [, bump] = useReducer((n) => n + 1, 0);
-  const ref = useRef(null);
-  if (!ref.current) ref.current = initialStore();
-  const S = ref.current;
+  const [S] = useState(initialStore);
 
   const api = useMemo(() => {
     const emit = () => bump();
@@ -294,7 +293,9 @@ export function useBoard() {
       emit();
     };
     const loadScene = (data) => {
-      if (!data || data.type !== 'inkboard' || !Array.isArray(data.elements)) throw new Error('Not an Inkboard file');
+      if (!data || !['drawdesign', 'inkboard'].includes(data.type) || !Array.isArray(data.elements)) {
+        throw new Error('Not a DrawDesign file');
+      }
       checkpoint();
       S.elements = data.elements;
       S.selectedIds = [];

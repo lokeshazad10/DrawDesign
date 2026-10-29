@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { FONTS } from '../lib/constants.js';
-import { LINE_HEIGHT, measureText } from '../lib/elements.js';
+import { useEffect, useRef, useState } from "react";
+import { FONTS } from "../lib/constants.js";
+import { LINE_HEIGHT, measureText } from "../lib/elements.js";
 
 // A textarea laid over the canvas at the text element's position and zoom.
 function Editor({ board, editing }) {
@@ -25,13 +25,17 @@ function Editor({ board, editing }) {
     board.finishEditing(ref.current ? ref.current.value : value);
   };
 
-  const { width, height } = measureText(value || ' ', editing.fontSize, editing.fontFamily);
-  const lines = Math.max(1, value.split('\n').length);
+  const { width, height } = measureText(
+    value || " ",
+    editing.fontSize,
+    editing.fontFamily,
+  );
+  const lines = Math.max(1, value.split("\n").length);
 
   return (
     <textarea
       ref={ref}
-      className="text-editor"
+      className="absolute z-5 m-0 resize-none overflow-hidden whitespace-pre border-0 bg-transparent p-0 outline-[1.5px] outline-dashed outline-offset-[3px] outline-(--accent)] dark:filter-[invert(93%)_hue-rotate(180deg)]"
       value={value}
       rows={lines}
       spellCheck={false}
@@ -39,7 +43,10 @@ function Editor({ board, editing }) {
       onChange={(e) => setValue(e.target.value)}
       onBlur={finish}
       onKeyDown={(e) => {
-        if (e.key === 'Escape' || ((e.ctrlKey || e.metaKey) && e.key === 'Enter')) {
+        if (
+          e.key === "Escape" ||
+          ((e.ctrlKey || e.metaKey) && e.key === "Enter")
+        ) {
           e.preventDefault();
           finish();
         }
@@ -63,5 +70,11 @@ function Editor({ board, editing }) {
 export default function TextEditor({ board }) {
   const { editing } = board.s;
   if (!editing) return null;
-  return <Editor key={`${editing.id}:${editing.x}:${editing.y}`} board={board} editing={editing} />;
+  return (
+    <Editor
+      key={`${editing.id}:${editing.x}:${editing.y}`}
+      board={board}
+      editing={editing}
+    />
+  );
 }

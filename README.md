@@ -1,7 +1,7 @@
-# Inkboard
+# DrawDesign
 
 A hand-drawn style infinite-canvas whiteboard, in the spirit of Excalidraw and Eraser.io.
-Built with React 19, Vite and [rough.js](https://roughjs.com). Everything is drawn on a single
+Built with React 19, Vite, Tailwind CSS and [rough.js](https://roughjs.com). Everything is drawn on a single
 HTML canvas, and the board autosaves to your browser.
 
 ## Run it
@@ -10,6 +10,7 @@ HTML canvas, and the board autosaves to your browser.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # production build in dist/
+npm run lint       # ESLint
 npm test           # unit tests (geometry, hit-testing, rendering, export)
 ```
 
@@ -45,20 +46,25 @@ Hold **Shift** while drawing to constrain to squares/circles or 15° angles.
 
 ```
 src/
-  App.jsx                  shell, global keyboard shortcuts
-  state/useBoard.js        the board store: elements, view, history, actions
-  lib/
-    elements.js            element model, hit-testing, resize, z-order
-    render.js              canvas renderer (rough.js), PNG and SVG export
-    geometry.js            small math helpers
-    constants.js           tools, palettes, defaults
-    files.js               save / open helpers
-  components/
-    Canvas.jsx             pointer interaction (draw, move, resize, pan, pinch)
-    Toolbar.jsx  TopBar.jsx  BottomBar.jsx  PropertiesPanel.jsx
-    TextEditor.jsx  ExportDialog.jsx  HelpDialog.jsx
-tests/                     node:test unit tests
+  app/                      application shell and global app hooks
+  features/
+    board/
+      components/           canvas, workspace, toolbar, panels and board controls
+      lib/                  board model helpers, geometry and rendering
+      model/useBoard.js     board state and actions
+    export/                 image export workflow and dialog
+    help/                   keyboard-shortcut help dialog
+  shared/
+    hooks/                  reusable app hooks (toast)
+    lib/                    shared browser utilities (file handling)
+    ui/                     reusable UI components
+  main.jsx                  browser entry point
+  styles.css                Tailwind entry, theme tokens and custom gradients
+tests/                      node:test unit tests
 ```
+
+Feature code is grouped by domain; shared utilities stay outside feature modules, and `app/`
+composes features without owning their implementation details.
 
 ## Design notes
 

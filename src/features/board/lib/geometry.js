@@ -18,7 +18,8 @@ export function pointInPolygon(px, py, poly) {
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
     const [xi, yi] = poly[i];
     const [xj, yj] = poly[j];
-    const crosses = yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
+    const crosses =
+      yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi;
     if (crosses) inside = !inside;
   }
   return inside;
@@ -35,7 +36,12 @@ export function rectContains(outer, inner) {
 }
 
 export function rectFromPoints(x1, y1, x2, y2) {
-  return { x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1), h: Math.abs(y2 - y1) };
+  return {
+    x: Math.min(x1, x2),
+    y: Math.min(y1, y2),
+    w: Math.abs(x2 - x1),
+    h: Math.abs(y2 - y1),
+  };
 }
 
 // Snap a vector to the nearest multiple of `step` radians (default 15 degrees).

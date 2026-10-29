@@ -4,13 +4,8 @@
 // element object; since elements are immutable, a changed element is a cache miss
 // and an unchanged one is free.
 
-import rough from 'roughjs';
-import {
-  ACCENT,
-  FONTS,
-  GRID_SIZE,
-  PAPER,
-} from './constants.js';
+import rough from "roughjs";
+import { ACCENT, FONTS, GRID_SIZE, PAPER } from "./constants.js";
 import {
   HANDLE_PAD,
   LINE_HEIGHT,
@@ -19,7 +14,7 @@ import {
   getHandles,
   getSelectionBounds,
   isLinear,
-} from './elements.js';
+} from "./elements.js";
 
 const generator = rough.generator();
 const drawableCache = new WeakMap();
@@ -35,9 +30,11 @@ function roughOptions(el) {
     strokeWidth: el.strokeWidth,
     bowing: 1,
   };
-  if (el.strokeStyle === 'dashed') opts.strokeLineDash = [el.strokeWidth * 4 + 4, el.strokeWidth * 3 + 4];
-  if (el.strokeStyle === 'dotted') opts.strokeLineDash = [0.1, el.strokeWidth * 2 + 4];
-  if (el.backgroundColor !== 'transparent') {
+  if (el.strokeStyle === "dashed")
+    opts.strokeLineDash = [el.strokeWidth * 4 + 4, el.strokeWidth * 3 + 4];
+  if (el.strokeStyle === "dotted")
+    opts.strokeLineDash = [0.1, el.strokeWidth * 2 + 4];
+  if (el.backgroundColor !== "transparent") {
     opts.fill = el.backgroundColor;
     opts.fillStyle = el.fillStyle;
     opts.fillWeight = Math.max(1, el.strokeWidth / 2);
@@ -48,8 +45,14 @@ function roughOptions(el) {
 
 function arrowHeadSegments(el) {
   const pts = el.points;
-  const [x1, y1] = [el.x + pts[pts.length - 2][0], el.y + pts[pts.length - 2][1]];
-  const [x2, y2] = [el.x + pts[pts.length - 1][0], el.y + pts[pts.length - 1][1]];
+  const [x1, y1] = [
+    el.x + pts[pts.length - 2][0],
+    el.y + pts[pts.length - 2][1],
+  ];
+  const [x2, y2] = [
+    el.x + pts[pts.length - 1][0],
+    el.y + pts[pts.length - 1][1],
+  ];
   const length = Math.hypot(x2 - x1, y2 - y1);
   if (length < 1) return [];
   const angle = Math.atan2(y2 - y1, x2 - x1);
@@ -70,22 +73,27 @@ export function getDrawables(el) {
   const b = getBounds(el);
   let drawables = [];
   switch (el.type) {
-    case 'rectangle':
-      if (b.w >= 1 && b.h >= 1) drawables = [generator.rectangle(b.x, b.y, b.w, b.h, opts)];
+    case "rectangle":
+      if (b.w >= 1 && b.h >= 1)
+        drawables = [generator.rectangle(b.x, b.y, b.w, b.h, opts)];
       break;
-    case 'diamond':
-      if (b.w >= 1 && b.h >= 1) drawables = [generator.polygon(diamondPoints(b), opts)];
+    case "diamond":
+      if (b.w >= 1 && b.h >= 1)
+        drawables = [generator.polygon(diamondPoints(b), opts)];
       break;
-    case 'ellipse':
-      if (b.w >= 1 && b.h >= 1) drawables = [generator.ellipse(b.x + b.w / 2, b.y + b.h / 2, b.w, b.h, opts)];
+    case "ellipse":
+      if (b.w >= 1 && b.h >= 1)
+        drawables = [
+          generator.ellipse(b.x + b.w / 2, b.y + b.h / 2, b.w, b.h, opts),
+        ];
       break;
-    case 'line':
-    case 'arrow': {
+    case "line":
+    case "arrow": {
       if (el.points.length >= 2) {
         const abs = el.points.map(([px, py]) => [el.x + px, el.y + py]);
         const lineOpts = { ...opts, fill: undefined };
         drawables = [generator.linearPath(abs, lineOpts)];
-        if (el.type === 'arrow') {
+        if (el.type === "arrow") {
           const headOpts = { ...lineOpts, strokeLineDash: undefined };
           for (const [[ax, ay], [bx, by]] of arrowHeadSegments(el)) {
             drawables.push(generator.line(ax, ay, bx, by, headOpts));
@@ -105,7 +113,8 @@ export function getDrawables(el) {
 export function freedrawPath(el) {
   const p = el.points.map(([px, py]) => [el.x + px, el.y + py]);
   const f = (n) => Math.round(n * 100) / 100;
-  if (p.length === 1) return `M${f(p[0][0])} ${f(p[0][1])} L${f(p[0][0])} ${f(p[0][1])}`;
+  if (p.length === 1)
+    return `M${f(p[0][0])} ${f(p[0][1])} L${f(p[0][0])} ${f(p[0][1])}`;
   let d = `M${f(p[0][0])} ${f(p[0][1])}`;
   if (p.length === 2) return `${d} L${f(p[1][0])} ${f(p[1][1])}`;
   for (let i = 1; i < p.length - 1; i++) {
@@ -131,21 +140,27 @@ function getRoughCanvas(canvas) {
 export function drawElement(ctx, rc, el, alphaScale = 1) {
   ctx.save();
   ctx.globalAlpha = (el.opacity / 100) * alphaScale;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
-  if (el.type === 'text') {
+  if (el.type === "text") {
     ctx.font = `${el.fontSize}px ${FONTS[el.fontFamily] ?? FONTS.hand}`;
     ctx.fillStyle = el.strokeColor;
-    ctx.textBaseline = 'top';
-    el.text.split('\n').forEach((line, i) => {
-      ctx.fillText(line, el.x, el.y + i * el.fontSize * LINE_HEIGHT + el.fontSize * 0.08);
+    ctx.textBaseline = "top";
+    el.text.split("\n").forEach((line, i) => {
+      ctx.fillText(
+        line,
+        el.x,
+        el.y + i * el.fontSize * LINE_HEIGHT + el.fontSize * 0.08,
+      );
     });
-  } else if (el.type === 'freedraw') {
+  } else if (el.type === "freedraw") {
     ctx.strokeStyle = el.strokeColor;
     ctx.lineWidth = el.strokeWidth;
-    if (el.strokeStyle === 'dashed') ctx.setLineDash([el.strokeWidth * 4 + 4, el.strokeWidth * 3 + 4]);
-    if (el.strokeStyle === 'dotted') ctx.setLineDash([0.1, el.strokeWidth * 2 + 4]);
+    if (el.strokeStyle === "dashed")
+      ctx.setLineDash([el.strokeWidth * 4 + 4, el.strokeWidth * 3 + 4]);
+    if (el.strokeStyle === "dotted")
+      ctx.setLineDash([0.1, el.strokeWidth * 2 + 4]);
     ctx.stroke(new Path2D(freedrawPath(el)));
   } else {
     for (const drawable of getDrawables(el)) rc.draw(drawable);
@@ -157,7 +172,7 @@ function drawGrid(ctx, view, width, height) {
   const size = GRID_SIZE * view.zoom;
   if (size < 8) return;
   ctx.save();
-  ctx.fillStyle = '#d9dde3';
+  ctx.fillStyle = "#d9dde3";
   const startX = ((view.x % size) + size) % size;
   const startY = ((view.y % size) + size) % size;
   const r = Math.max(0.8, Math.min(1.4, view.zoom * 0.9));
@@ -179,7 +194,7 @@ function drawSelection(ctx, elements, selectedIds, zoom) {
 
   ctx.save();
   ctx.strokeStyle = ACCENT;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.lineWidth = 1.5 * px;
 
   // Per-element outline when several are selected.
@@ -215,8 +230,19 @@ function drawSelection(ctx, elements, selectedIds, zoom) {
 
 // opts: { elements, view, selectedIds, grid, editingId, marquee, erasingIds, width, height, dpr }
 export function renderScene(canvas, opts) {
-  const { elements, view, selectedIds, grid, editingId, marquee, erasingIds, width, height, dpr } = opts;
-  const ctx = canvas.getContext('2d');
+  const {
+    elements,
+    view,
+    selectedIds,
+    grid,
+    editingId,
+    marquee,
+    erasingIds,
+    width,
+    height,
+    dpr,
+  } = opts;
+  const ctx = canvas.getContext("2d");
   const rc = getRoughCanvas(canvas);
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -225,7 +251,14 @@ export function renderScene(canvas, opts) {
   ctx.fillRect(0, 0, width, height);
   if (grid) drawGrid(ctx, view, width, height);
 
-  ctx.setTransform(dpr * view.zoom, 0, 0, dpr * view.zoom, dpr * view.x, dpr * view.y);
+  ctx.setTransform(
+    dpr * view.zoom,
+    0,
+    0,
+    dpr * view.zoom,
+    dpr * view.x,
+    dpr * view.y,
+  );
 
   for (const el of elements) {
     if (el.id === editingId) continue;
@@ -250,11 +283,16 @@ export function renderScene(canvas, opts) {
 function exportBox(elements, padding) {
   const b = getSelectionBounds(elements);
   if (!b) return null;
-  return { x: b.x - padding, y: b.y - padding, w: Math.max(1, b.w + padding * 2), h: Math.max(1, b.h + padding * 2) };
+  return {
+    x: b.x - padding,
+    y: b.y - padding,
+    w: Math.max(1, b.w + padding * 2),
+    h: Math.max(1, b.h + padding * 2),
+  };
 }
 
 const defaultCreateCanvas = (w, h) => {
-  const c = document.createElement('canvas');
+  const c = document.createElement("canvas");
   c.width = w;
   c.height = h;
   return c;
@@ -272,10 +310,10 @@ export function exportToCanvas(
   const h = Math.ceil(box.h * scale);
 
   const scene = createCanvas(w, h);
-  const ctx = scene.getContext('2d');
+  const ctx = scene.getContext("2d");
   const rc = rough.canvas(scene);
   if (background) {
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, w, h);
   }
   ctx.setTransform(scale, 0, 0, scale, -box.x * scale, -box.y * scale);
@@ -285,61 +323,68 @@ export function exportToCanvas(
 
   // Dark export: same colour inversion the live canvas uses.
   const out = createCanvas(w, h);
-  const octx = out.getContext('2d');
-  octx.filter = 'invert(93%) hue-rotate(180deg)';
+  const octx = out.getContext("2d");
+  octx.filter = "invert(93%) hue-rotate(180deg)";
   octx.drawImage(scene, 0, 0);
-  octx.filter = 'none';
+  octx.filter = "none";
   return out;
 }
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
+const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function exportToSvg(elements, { background = true, padding = 28 } = {}, doc = document) {
+export function exportToSvg(
+  elements,
+  { background = true, padding = 28 } = {},
+  doc = document,
+) {
   const box = exportBox(elements, padding);
   if (!box) return null;
 
-  const svg = doc.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('xmlns', SVG_NS);
-  svg.setAttribute('width', String(Math.ceil(box.w)));
-  svg.setAttribute('height', String(Math.ceil(box.h)));
-  svg.setAttribute('viewBox', `${box.x} ${box.y} ${box.w} ${box.h}`);
+  const svg = doc.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("xmlns", SVG_NS);
+  svg.setAttribute("width", String(Math.ceil(box.w)));
+  svg.setAttribute("height", String(Math.ceil(box.h)));
+  svg.setAttribute("viewBox", `${box.x} ${box.y} ${box.w} ${box.h}`);
 
   if (background) {
-    const rect = doc.createElementNS(SVG_NS, 'rect');
-    rect.setAttribute('x', String(box.x));
-    rect.setAttribute('y', String(box.y));
-    rect.setAttribute('width', String(box.w));
-    rect.setAttribute('height', String(box.h));
-    rect.setAttribute('fill', '#ffffff');
+    const rect = doc.createElementNS(SVG_NS, "rect");
+    rect.setAttribute("x", String(box.x));
+    rect.setAttribute("y", String(box.y));
+    rect.setAttribute("width", String(box.w));
+    rect.setAttribute("height", String(box.h));
+    rect.setAttribute("fill", "#ffffff");
     svg.appendChild(rect);
   }
 
   const rs = rough.svg(svg);
   for (const el of elements) {
-    const g = doc.createElementNS(SVG_NS, 'g');
-    g.setAttribute('opacity', String(el.opacity / 100));
-    g.setAttribute('stroke-linecap', 'round');
-    g.setAttribute('stroke-linejoin', 'round');
+    const g = doc.createElementNS(SVG_NS, "g");
+    g.setAttribute("opacity", String(el.opacity / 100));
+    g.setAttribute("stroke-linecap", "round");
+    g.setAttribute("stroke-linejoin", "round");
 
-    if (el.type === 'text') {
-      el.text.split('\n').forEach((line, i) => {
-        const t = doc.createElementNS(SVG_NS, 'text');
-        t.setAttribute('x', String(el.x));
-        t.setAttribute('y', String(el.y + i * el.fontSize * LINE_HEIGHT + el.fontSize * 0.08));
-        t.setAttribute('dominant-baseline', 'hanging');
-        t.setAttribute('font-size', String(el.fontSize));
-        t.setAttribute('font-family', FONTS[el.fontFamily] ?? FONTS.hand);
-        t.setAttribute('fill', el.strokeColor);
-        t.setAttribute('xml:space', 'preserve');
+    if (el.type === "text") {
+      el.text.split("\n").forEach((line, i) => {
+        const t = doc.createElementNS(SVG_NS, "text");
+        t.setAttribute("x", String(el.x));
+        t.setAttribute(
+          "y",
+          String(el.y + i * el.fontSize * LINE_HEIGHT + el.fontSize * 0.08),
+        );
+        t.setAttribute("dominant-baseline", "hanging");
+        t.setAttribute("font-size", String(el.fontSize));
+        t.setAttribute("font-family", FONTS[el.fontFamily] ?? FONTS.hand);
+        t.setAttribute("fill", el.strokeColor);
+        t.setAttribute("xml:space", "preserve");
         t.textContent = line;
         g.appendChild(t);
       });
-    } else if (el.type === 'freedraw') {
-      const path = doc.createElementNS(SVG_NS, 'path');
-      path.setAttribute('d', freedrawPath(el));
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', el.strokeColor);
-      path.setAttribute('stroke-width', String(el.strokeWidth));
+    } else if (el.type === "freedraw") {
+      const path = doc.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", freedrawPath(el));
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", el.strokeColor);
+      path.setAttribute("stroke-width", String(el.strokeWidth));
       g.appendChild(path);
     } else {
       for (const drawable of getDrawables(el)) g.appendChild(rs.draw(drawable));
