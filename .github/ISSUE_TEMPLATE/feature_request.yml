@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an improvement for DrawDesign
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping improve DrawDesign.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem or need would this feature address?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or behavior you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches or workarounds have you considered?
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add examples, mockups, or other relevant context.
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Willingness to contribute
+      description: Would you be interested in helping implement this?
+      options:
+        - "Yes"
+        - "No"
+        - "Maybe"
+    validations:
+      required: true

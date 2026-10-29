@@ -16,6 +16,7 @@ coverage/
 *.lcov
 test-results/
 playwright-report/
+test-output/
 
 # Logs and debug files
 *.log
@@ -27,8 +28,15 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+ehthumbs.db
+Icon?
 
 # Local editor files
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
 *.swp
 *.swo
+*.code-workspace
