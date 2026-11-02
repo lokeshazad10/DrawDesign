@@ -21,10 +21,7 @@ A hand-drawn-style infinite-canvas whiteboard for sketching, annotating, and exp
 
 ## Demo and screenshots
 
-The repository does not currently include a hosted demo or screenshot. Add a screenshot at
-`docs/images/screenshot.png` when one is available.
-
-*Screenshot coming soon. Add an image here when one is available.*
+![DrawDesign demo screenshot](docs/images/screenshot.png)
 
 ## Tech stack
 
