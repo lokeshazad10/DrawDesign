@@ -5,17 +5,30 @@ bug reports, feature ideas, code, tests, documentation, accessibility improvemen
 feedback, and translations. This guide walks through the process from setting up the project
 to opening a pull request.
 
-## Before you start
+## Contribution workflow
 
-- For a small fix or documentation change, you can get started right away.
-- For a new feature or a large change, open a
-  [feature request](https://github.com/lokeshazad10/DrawDesign/issues/new?template=feature_request.yml)
-  first. This gives maintainers and contributors a chance to agree on the approach before you
-  spend time implementing it.
-- If you plan to work on an existing issue, check its discussion first. If you are unsure
-  whether someone is already working on it, leave a comment before starting.
-- For a security vulnerability, do not open a public issue. Follow the private reporting
-  instructions in [SECURITY.md](SECURITY.md).
+Before making any code, documentation, design, test, accessibility, or translation change,
+follow this workflow:
+
+1. Search the existing issues to see whether your proposal has already been discussed.
+2. If there is no suitable issue, create one using the appropriate
+   [bug report form](https://github.com/lokeshazad10/DrawDesign/issues/new?template=bug_report.yml)
+   or
+   [feature request form](https://github.com/lokeshazad10/DrawDesign/issues/new?template=feature_request.yml).
+   If a relevant issue already exists, comment on it instead.
+3. Discuss the proposed approach in the issue and wait for maintainer feedback.
+4. Do not begin implementation until a maintainer has explicitly assigned the issue to you.
+5. After assignment, create a separate Git branch for the work.
+6. Make focused changes on that branch, keeping them limited to the assigned issue.
+7. Run `npm test` and `npm run lint`. For application changes, also run `npm run build`.
+8. Push your branch and open a pull request linked to the assigned issue.
+
+Pull requests without a corresponding issue explicitly assigned to the contributor may be
+closed or may need an issue before review. Maintainers may permit a very small typo or
+documentation-only fix as an exception; ask before making that change.
+
+For a security vulnerability, do not open a public issue. Follow the private reporting
+instructions in [SECURITY.md](SECURITY.md).
 
 ## 1. Set up your development environment
 
