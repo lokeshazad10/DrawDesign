@@ -56,7 +56,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
   const savePng = async () => {
     const canvas = render();
     if (!canvas) return;
-    downloadBlob(await canvasToBlob(canvas), `drawdesign-${stamp()}.png`);
+    downloadBlob(await canvasToBlob(canvas), `sketchboard-${stamp()}.png`);
     onToast("Exported PNG");
   };
 
@@ -65,7 +65,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
     if (!svg) return;
     downloadBlob(
       new Blob([svgToString(svg)], { type: "image/svg+xml" }),
-      `drawdesign-${stamp()}.svg`,
+      `sketchboard-${stamp()}.svg`,
     );
     onToast("Exported SVG");
   };
@@ -114,7 +114,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
         </header>
 
         <div
-          className={`grid h-[260px] place-items-center overflow-hidden rounded-xl border border-[var(--border)] bg-white p-3 ${background ? "" : "preview-checker"}`}
+          className={`grid h-[260px] place-items-center overflow-hidden rounded-xl border border-[var(--border)] p-3 ${background ? "bg-white" : "[background:repeating-conic-gradient(#e3e6eb_0%_25%,#f7f8fa_0%_50%)_50%/16px_16px]"}`}
         >
           {empty ? (
             <p className="text-[var(--muted)]">

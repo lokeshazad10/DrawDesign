@@ -1,8 +1,8 @@
 # DrawDesign
 
-A hand-drawn-style infinite-canvas whiteboard for sketching, annotating, and exporting ideas.
+**Sketchboard** is the entry point at `/`. The DrawDesign product website is available at `/website`.
 
-[![Build](https://img.shields.io/badge/build-not%20configured-lightgrey)](#development)
+[![Build](https://img.shields.io/badge/build-Vite-success)](#development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ESM-yellow)](https://developer.mozilla.org/docs/Web/JavaScript)
@@ -10,6 +10,13 @@ A hand-drawn-style infinite-canvas whiteboard for sketching, annotating, and exp
 [![Vite](https://img.shields.io/badge/Vite-8-646cff)](https://vite.dev/)
 
 ## Features
+
+### DrawDesign website
+
+- Explore Sketchboard and jump straight into the board from the landing page.
+- Browse a responsive product page with a preview of the canvas.
+
+### Sketchboard
 
 - Sketch rectangles, diamonds, ellipses, arrows, lines, freehand strokes, and text.
 - Select, move, resize, style, reorder, copy, paste, duplicate, and delete elements.
@@ -21,7 +28,7 @@ A hand-drawn-style infinite-canvas whiteboard for sketching, annotating, and exp
 
 ## Demo and screenshots
 
-![DrawDesign demo screenshot](docs/images/screenshot.png)
+![Sketchboard demo screenshot](docs/images/screenshot.png)
 
 ## Tech stack
 
@@ -74,8 +81,8 @@ Start the local development server:
 npm run dev
 ```
 
-Open the URL Vite prints (by default, <http://localhost:5173>). Changes are reloaded during
-development.
+Open the URL Vite prints (by default, <http://localhost:5173>) for Sketchboard.
+Open <http://localhost:5173/website> for the DrawDesign website. Changes are reloaded during development.
 
 ## Available scripts
 
@@ -126,19 +133,20 @@ production bundle with `npm run build`.
 
 ```text
 src/
-  app/                      Application shell and global hooks
+  app/
+    App.jsx                 Route selection for website and board
+    BoardApp.jsx            Sketchboard application shell
   features/
-    board/
-      components/           Canvas, workspace, toolbar, and panels
-      lib/                  Element, geometry, and rendering helpers
-      model/useBoard.js     Board state and actions
+    website/                DrawDesign landing page
+    board/                  Canvas, tools, properties, and board state
     export/                 Image export workflow
     help/                   Keyboard shortcut reference
   shared/                   Reusable hooks, utilities, and UI
   main.jsx                  Browser entry point
-  styles.css                Tailwind entry and application styles
+  styles.css                Board styles
 tests/                      Node.js unit tests
 public/                     Static assets
+docs/images/                Shared board preview
 ```
 
 ## Roadmap
@@ -159,7 +167,7 @@ We expect everyone to help keep the project welcoming and respectful. See
 
 ## License
 
-DrawDesign is distributed under the MIT License. See [LICENSE](LICENSE) for details.
+DrawDesign and Sketchboard are distributed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Support and contact
 

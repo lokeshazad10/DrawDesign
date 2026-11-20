@@ -44,7 +44,7 @@ function Swatches({ label, colors, value, onChange }) {
         <button
           key={c}
           type="button"
-          className={`relative h-6.5 w-6.5 rounded-[7px] border border-[rgba(0,0,0,0.18)] p-0 dark:border-[rgba(255,255,255,0.22)] aria-pressed:outline-2 aria-pressed:outline-offset-2 aria-pressed:outline-[var(--accent)]${c === "transparent" ? " swatch-none" : ""}`}
+          className={`relative h-6.5 w-6.5 rounded-[7px] border border-[rgba(0,0,0,0.18)] p-0 dark:border-[rgba(255,255,255,0.22)] aria-pressed:outline-2 aria-pressed:outline-offset-2 aria-pressed:outline-[var(--accent)]${c === "transparent" ? " [background:linear-gradient(135deg,transparent_46%,#e03131_46%,#e03131_54%,transparent_54%),repeating-conic-gradient(#d5d8de_0%_25%,#fff_0%_50%)_50%/10px_10px]" : ""}`}
           style={c === "transparent" ? undefined : { background: c }}
           aria-pressed={value === c}
           aria-label={c === "transparent" ? `${label}: none` : `${label}: ${c}`}
@@ -53,7 +53,7 @@ function Swatches({ label, colors, value, onChange }) {
         />
       ))}
       <label
-        className={`relative block h-6.5 w-6.5 cursor-pointer rounded-[7px] border border-[rgba(0,0,0,0.18)] dark:border-[rgba(255,255,255,0.22)]${custom ? " outline-2 outline-offset-2 outline-(--accent)" : ""} swatch-custom`}
+        className={`relative block h-6.5 w-6.5 cursor-pointer rounded-[7px] border border-[rgba(0,0,0,0.18)] dark:border-[rgba(255,255,255,0.22)]${custom ? " outline-2 outline-offset-2 outline-(--accent)" : ""} [background:conic-gradient(#e03131,#f08c00,#ffd43b,#2f9e44,#1971c2,#9c36b5,#e03131)]`}
         style={custom ? { background: value } : undefined}
         title="Custom colour"
       >
