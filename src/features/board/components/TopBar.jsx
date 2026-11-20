@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   FolderOpen,
   Grid3x3,
+  House,
   ImageDown,
   Keyboard,
   Maximize,
@@ -56,7 +57,7 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
     const blob = new Blob([JSON.stringify(serializeScene(board.s), null, 2)], {
       type: "application/json",
     });
-    downloadBlob(blob, `drawdesign-${stamp()}.json`);
+    downloadBlob(blob, `sketchboard-${stamp()}.json`);
     onToast("Saved board to file");
   };
 
@@ -69,7 +70,7 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
       board.fitToContent(window.innerWidth, window.innerHeight);
       onToast(`Opened ${file.name}`);
     } catch {
-      onToast("That file is not a DrawDesign board");
+      onToast("That file is not a Sketchboard board");
     }
   };
 
@@ -95,7 +96,7 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
         >
           <Menu size={18} />
           <span className="font-(family-name:--font-display) text-[16px] font-bold tracking-[-0.01em] max-[720px]:hidden">
-            DrawDesign
+            Sketchboard
           </span>
         </button>
         {open && (
@@ -169,6 +170,13 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
               <Keyboard size={16} /> Keyboard shortcuts{" "}
               <kbd className="ml-auto text-[var(--muted)]">?</kbd>
             </button>
+            <a
+              href="/website"
+              className="flex w-full items-center gap-[10px] rounded-lg px-[10px] py-2 text-left hover:bg-[var(--surface-2)]"
+              role="menuitem"
+            >
+              <House size={16} /> DrawDesign website
+            </a>
             <button
               type="button"
               role="menuitem"

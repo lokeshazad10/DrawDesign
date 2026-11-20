@@ -2,7 +2,7 @@
   "name": "drawdesign",
   "private": true,
   "version": "1.0.0",
-  "description": "DrawDesign - a hand-drawn style infinite canvas whiteboard built with React and roughjs",
+  "description": "DrawDesign website and Sketchboard whiteboard",
   "type": "module",
   "scripts": {
     "dev": "vite",

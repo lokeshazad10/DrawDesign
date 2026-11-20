@@ -1,6 +1,9 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Tailwind CSS v4 directive; ignore it in CSS linters that do not recognize Tailwind at-rules. */
+/* css-lint-disable-next-line unknownAtRules */
+/* stylelint-disable-next-line at-rule-no-unknown */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @layer base {
@@ -68,33 +71,4 @@
     font-family: var(--font-ui);
     font-size: 11px;
   }
-}
-
-.swatch-none {
-  background:
-    linear-gradient(
-      135deg,
-      transparent 46%,
-      #e03131 46%,
-      #e03131 54%,
-      transparent 54%
-    ),
-    repeating-conic-gradient(#d5d8de 0% 25%, #fff 0% 50%) 50% / 10px 10px;
-}
-
-.swatch-custom {
-  background: conic-gradient(
-    #e03131,
-    #f08c00,
-    #ffd43b,
-    #2f9e44,
-    #1971c2,
-    #9c36b5,
-    #e03131
-  );
-}
-
-.preview-checker {
-  background: repeating-conic-gradient(#e3e6eb 0% 25%, #f7f8fa 0% 50%) 50% /
-    16px 16px;
 }
