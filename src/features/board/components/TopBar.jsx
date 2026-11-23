@@ -17,7 +17,7 @@ import {
   readFileText,
   stamp,
 } from "../../../shared/lib/files.js";
-import { serializeScene } from "../model/useBoard.js";
+import { exportScene } from "../model/useBoard.js";
 
 export default function TopBar({ board, onExport, onHelp, onToast }) {
   const { theme, grid } = board.s;
@@ -53,12 +53,17 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
     fileRef.current?.click();
   };
 
-  const saveFile = () => {
-    const blob = new Blob([JSON.stringify(serializeScene(board.s), null, 2)], {
-      type: "application/json",
-    });
-    downloadBlob(blob, `sketchboard-${stamp()}.json`);
-    onToast("Saved board to file");
+  const saveFile = async () => {
+    try {
+      const data = await exportScene(board.s);
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      downloadBlob(blob, `sketchboard-${stamp()}.json`);
+      onToast("Saved board to file");
+    } catch (err) {
+      onToast(err.message || "Could not save the board");
+    }
   };
 
   const openFile = async (e) => {
@@ -66,18 +71,22 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
     e.target.value = "";
     if (!file) return;
     try {
-      board.loadScene(JSON.parse(await readFileText(file)));
+      await board.loadScene(JSON.parse(await readFileText(file)));
       board.fitToContent(window.innerWidth, window.innerHeight);
       onToast(`Opened ${file.name}`);
-    } catch {
-      onToast("That file is not a Sketchboard board");
+    } catch (err) {
+      onToast(
+        err.message === "Not a DrawDesign file"
+          ? "That file is not a Sketchboard board"
+          : err.message || "Could not open that board",
+      );
     }
   };
 
   const clear = () => {
     if (!board.s.elements.length) return;
     if (
-      window.confirm("Clear the whole board? You can undo this with Ctrl+Z.")
+      window.confirm("Clear the whole board? Its stored images will be removed.")
     ) {
       board.clearScene();
       onToast("Board cleared");

@@ -20,10 +20,10 @@ const boardBodyClasses = [
 ];
 
 export default function App() {
-  const board = useBoard();
   const [exportOpen, setExportOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [toast, showToast] = useToast();
+  const board = useBoard({ onError: showToast });
   const { theme } = board.s;
 
   useEffect(() => {

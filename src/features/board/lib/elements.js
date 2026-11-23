@@ -9,6 +9,7 @@
 // relative to that origin.
 
 import { FONTS } from "./constants.js";
+import { fitImageSize } from "./images.js";
 import { clamp, distToSegment, pointInPolygon } from "./geometry.js";
 
 let counter = 0;
@@ -50,7 +51,26 @@ export function createElement(type, x, y, style) {
     el.fontFamily = style.fontFamily;
     el.backgroundColor = "transparent";
   }
+  if (type === "image") {
+    el.fileId = "";
+    el.naturalWidth = 0;
+    el.naturalHeight = 0;
+    el.backgroundColor = "transparent";
+  }
   return el;
+}
+
+export function createImageElement(image, x, y, style) {
+  const size = fitImageSize(image.width, image.height);
+  return {
+    ...createElement("image", x, y, style),
+    fileId: image.fileId,
+    name: image.name,
+    naturalWidth: image.width,
+    naturalHeight: image.height,
+    width: size.width,
+    height: size.height,
+  };
 }
 
 // ---------------------------------------------------------------- text
@@ -200,6 +220,7 @@ export function hitTest(el, px, py, tolerance) {
       return false;
     }
     case "text":
+    case "image":
       return (
         px >= b.x - t &&
         px <= b.x + b.w + t &&
@@ -314,7 +335,8 @@ export function normalizeElement(el) {
 
 // True when a just-drawn element is too small to be intentional (a stray click).
 export function isDegenerate(el) {
-  if (el.type === "freedraw" || el.type === "text") return false;
+  if (el.type === "freedraw" || el.type === "text" || el.type === "image")
+    return false;
   if (isLinear(el)) {
     const [p0, p1] = [el.points[0], el.points[el.points.length - 1]];
     return Math.hypot(p1[0] - p0[0], p1[1] - p0[1]) < 3;

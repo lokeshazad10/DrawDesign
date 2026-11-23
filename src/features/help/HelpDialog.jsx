@@ -26,6 +26,7 @@ const GROUPS = [
       ["Zoom to fit", "Shift+1"],
       ["Reset zoom", "Ctrl+0"],
       ["Show grid", "Ctrl+'"],
+      ["Insert image", "Toolbar button or drop a file"],
       ["Export image", "Ctrl+Shift+E"],
     ],
   },

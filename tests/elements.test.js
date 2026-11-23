@@ -4,6 +4,7 @@ import { DEFAULT_STYLE } from "../src/features/board/lib/constants.js";
 import {
   cloneElements,
   createElement,
+  createImageElement,
   getBounds,
   getSelectionBounds,
   hitHandle,
@@ -150,6 +151,23 @@ test("degenerate drags are discarded, real ones kept", () => {
   assert.ok(!isDegenerate(make("rectangle", 0, 0, 20, 1)));
   assert.ok(isDegenerate(line(0, 0, 1, 1)));
   assert.ok(!isDegenerate(line(0, 0, 30, 0)));
+});
+
+test("images keep their source, fit the board and behave like bounds-based elements", () => {
+  const img = createImageElement(
+    { fileId: "file-1", name: "wide.png", width: 1200, height: 600 },
+    0,
+    0,
+    DEFAULT_STYLE,
+  );
+  assert.equal(img.fileId, "file-1");
+  assert.ok(!("src" in img));
+  assert.deepEqual([img.width, img.height], [360, 180]);
+  assert.ok(hitTest(img, 10, 10, 4));
+  assert.ok(!hitTest(img, 400, 10, 4));
+  assert.ok(!isDegenerate(img));
+  const scaled = normalizeElement(scaleElement(img, 0, 0, 2, 0.5));
+  assert.deepEqual(getBounds(scaled), { x: 0, y: 0, w: 720, h: 90 });
 });
 
 test("cloneElements gives new ids and deep-copies points", () => {

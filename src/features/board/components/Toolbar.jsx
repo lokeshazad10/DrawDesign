@@ -1,9 +1,11 @@
+import { useRef } from "react";
 import {
   ArrowUpRight,
   Circle,
   Diamond,
   Eraser,
   Hand,
+  ImagePlus,
   Lock,
   LockOpen,
   Minus,
@@ -13,6 +15,7 @@ import {
   Type,
 } from "lucide-react";
 import { TOOLS } from "../lib/constants.js";
+import { confirmLargeImage, importImageFile } from "../lib/images.js";
 
 const ICONS = {
   select: MousePointer2,
@@ -32,8 +35,22 @@ const releaseFocus = (e) => {
   if (e.detail) e.currentTarget.blur();
 };
 
-export default function Toolbar({ board }) {
+export default function Toolbar({ board, onToast }) {
   const { tool, toolLock } = board.s;
+  const fileRef = useRef(null);
+
+  const onImageFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !confirmLargeImage(file)) return;
+    try {
+      board.addImage(await importImageFile(file));
+      onToast?.("Image added to board");
+    } catch (err) {
+      onToast?.(err.message || "Could not add that image");
+    }
+  };
+
   return (
     <nav
       className="absolute left-1/2 top-3 z-10 flex max-w-[calc(100vw-16px)] -translate-x-1/2 items-center gap-0.5 overflow-x-auto rounded-(--radius) border border-(--border) bg-(--surface) p-1 shadow-(--shadow) scrollbar-width:none [&::-webkit-scrollbar]:hidden max-[720px]:bottom-2.5 max-[720px]:top-auto"
@@ -84,6 +101,30 @@ export default function Toolbar({ board }) {
           </button>
         );
       })}
+      <span
+        className="my-1 mx-1 w-px self-stretch bg-(--border)"
+        aria-hidden="true"
+      />
+      <button
+        type="button"
+        className="relative grid h-9 w-9 shrink-0 place-items-center rounded-lg border-0 bg-transparent p-0 text-(--text) hover:bg-(--surface-2)"
+        title="Insert image"
+        aria-label="Insert image"
+        onClick={(e) => {
+          fileRef.current?.click();
+          releaseFocus(e);
+        }}
+      >
+        <ImagePlus size={18} />
+      </button>
+      <input
+        ref={fileRef}
+        className="hidden"
+        type="file"
+        accept="image/*"
+        aria-label="Choose an image to insert"
+        onChange={onImageFile}
+      />
     </nav>
   );
 }

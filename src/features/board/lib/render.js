@@ -6,6 +6,7 @@
 
 import rough from "roughjs";
 import { ACCENT, FONTS, GRID_SIZE, PAPER } from "./constants.js";
+import { getImage, withImageSources } from "./images.js";
 import {
   HANDLE_PAD,
   LINE_HEIGHT,
@@ -143,7 +144,10 @@ export function drawElement(ctx, rc, el, alphaScale = 1) {
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
-  if (el.type === "text") {
+  if (el.type === "image") {
+    const img = getImage(el.fileId || el.src);
+    if (img) ctx.drawImage(img, el.x, el.y, el.width, el.height);
+  } else if (el.type === "text") {
     ctx.font = `${el.fontSize}px ${FONTS[el.fontFamily] ?? FONTS.hand}`;
     ctx.fillStyle = el.strokeColor;
     ctx.textBaseline = "top";
@@ -332,13 +336,14 @@ export function exportToCanvas(
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export function exportToSvg(
+export async function exportToSvg(
   elements,
   { background = true, padding = 28 } = {},
   doc = document,
 ) {
   const box = exportBox(elements, padding);
   if (!box) return null;
+  const sources = await withImageSources(elements);
 
   const svg = doc.createElementNS(SVG_NS, "svg");
   svg.setAttribute("xmlns", SVG_NS);
@@ -357,13 +362,22 @@ export function exportToSvg(
   }
 
   const rs = rough.svg(svg);
-  for (const el of elements) {
+  for (const el of sources) {
     const g = doc.createElementNS(SVG_NS, "g");
     g.setAttribute("opacity", String(el.opacity / 100));
     g.setAttribute("stroke-linecap", "round");
     g.setAttribute("stroke-linejoin", "round");
 
-    if (el.type === "text") {
+    if (el.type === "image") {
+      const image = doc.createElementNS(SVG_NS, "image");
+      image.setAttribute("x", String(el.x));
+      image.setAttribute("y", String(el.y));
+      image.setAttribute("width", String(el.width));
+      image.setAttribute("height", String(el.height));
+      image.setAttribute("preserveAspectRatio", "none");
+      image.setAttribute("href", el.src);
+      g.appendChild(image);
+    } else if (el.type === "text") {
       el.text.split("\n").forEach((line, i) => {
         const t = doc.createElementNS(SVG_NS, "text");
         t.setAttribute("x", String(el.x));

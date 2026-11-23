@@ -5,6 +5,7 @@ import {
   exportToSvg,
   svgToString,
 } from "../board/lib/render.js";
+import { preloadImages } from "../board/lib/images.js";
 import {
   canvasToBlob,
   copyImageToClipboard,
@@ -19,6 +20,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
   const [background, setBackground] = useState(true);
   const [dark, setDark] = useState(board.s.theme === "dark");
   const [scale, setScale] = useState(2);
+  const [imagesReady, setImagesReady] = useState(0);
   const previewRef = useRef(null);
   const dialogRef = useRef(null);
 
@@ -28,6 +30,20 @@ export default function ExportDialog({ board, onClose, onToast }) {
       ? elements.filter((e) => ids.has(e.id))
       : elements;
   }, [elements, selectedIds, onlySelected, hasSelection]);
+
+  useEffect(() => {
+    let active = true;
+    preloadImages(targets)
+      .then(() => {
+        if (active) setImagesReady((n) => n + 1);
+      })
+      .catch((err) => {
+        if (active) onToast?.(err.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [targets, onToast]);
 
   // Live preview (always at 1x so it stays cheap).
   useEffect(() => {
@@ -42,7 +58,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
     canvas.width = rendered.width;
     canvas.height = rendered.height;
     ctx.drawImage(rendered, 0, 0);
-  }, [targets, background, dark]);
+  }, [targets, background, dark, imagesReady, onToast]);
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -51,29 +67,40 @@ export default function ExportDialog({ board, onClose, onToast }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const render = () => exportToCanvas(targets, { scale, background, dark });
-
-  const savePng = async () => {
-    const canvas = render();
-    if (!canvas) return;
-    downloadBlob(await canvasToBlob(canvas), `sketchboard-${stamp()}.png`);
-    onToast("Exported PNG");
+  const renderWithImages = async () => {
+    await preloadImages(targets);
+    return exportToCanvas(targets, { scale, background, dark });
   };
 
-  const saveSvg = () => {
-    const svg = exportToSvg(targets, { background });
-    if (!svg) return;
-    downloadBlob(
-      new Blob([svgToString(svg)], { type: "image/svg+xml" }),
-      `sketchboard-${stamp()}.svg`,
-    );
-    onToast("Exported SVG");
+  const savePng = async () => {
+    try {
+      const canvas = await renderWithImages();
+      if (!canvas) return;
+      downloadBlob(await canvasToBlob(canvas), `sketchboard-${stamp()}.png`);
+      onToast("Exported PNG");
+    } catch (err) {
+      onToast(err.message || "Could not export the PNG");
+    }
+  };
+
+  const saveSvg = async () => {
+    try {
+      const svg = await exportToSvg(targets, { background });
+      if (!svg) return;
+      downloadBlob(
+        new Blob([svgToString(svg)], { type: "image/svg+xml" }),
+        `sketchboard-${stamp()}.svg`,
+      );
+      onToast("Exported SVG");
+    } catch (err) {
+      onToast(err.message || "Could not export the SVG");
+    }
   };
 
   const copyPng = async () => {
-    const canvas = render();
-    if (!canvas) return;
     try {
+      const canvas = await renderWithImages();
+      if (!canvas) return;
       await copyImageToClipboard(await canvasToBlob(canvas));
       onToast("Copied image to clipboard");
     } catch (err) {
@@ -89,23 +116,23 @@ export default function ExportDialog({ board, onClose, onToast }) {
       onPointerDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="max-h-[calc(100vh-32px)] w-[min(560px,100%)] overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-[18px] shadow-[var(--shadow)] outline-none"
+        className="max-h-[calc(100vh-32px)] w-[min(560px,100%)] overflow-auto rounded-2xl border border-(--border) bg-(--surface) p-4.5 shadow-(--shadow) outline-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="export-title"
         tabIndex={-1}
         ref={dialogRef}
       >
-        <header className="mb-[14px] flex items-center justify-between">
+        <header className="mb-3.5 flex items-center justify-between">
           <h2
             id="export-title"
-            className="m-0 font-[family-name:var(--font-display)] text-[20px] font-bold tracking-[-0.01em]"
+            className="m-0 font-(family-name:--font-display) text-[20px] font-bold tracking-[-0.01em]"
           >
             Export image
           </h2>
           <button
             type="button"
-            className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent p-0 hover:bg-[var(--surface-2)]"
+            className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent p-0 hover:bg-(--surface-2)"
             aria-label="Close"
             onClick={onClose}
           >
@@ -114,10 +141,10 @@ export default function ExportDialog({ board, onClose, onToast }) {
         </header>
 
         <div
-          className={`grid h-[260px] place-items-center overflow-hidden rounded-xl border border-[var(--border)] p-3 ${background ? "bg-white" : "[background:repeating-conic-gradient(#e3e6eb_0%_25%,#f7f8fa_0%_50%)_50%/16px_16px]"}`}
+          className={`grid h-65 place-items-center overflow-hidden rounded-xl border border-(--border) p-3 ${background ? "bg-white" : "[background:repeating-conic-gradient(#e3e6eb_0%_25%,#f7f8fa_0%_50%)_50%/16px_16px]"}`}
         >
           {empty ? (
-            <p className="text-[var(--muted)]">
+            <p className="text-(--muted)">
               Nothing to export yet. Draw something first.
             </p>
           ) : (
@@ -128,10 +155,10 @@ export default function ExportDialog({ board, onClose, onToast }) {
           )}
         </div>
 
-        <div className="my-[14px] flex flex-wrap items-center gap-x-[18px] gap-y-[10px]">
+        <div className="my-3.5 flex flex-wrap items-center gap-x-4.5 gap-y-2.5">
           <label className="inline-flex cursor-pointer items-center gap-1.5">
             <input
-              className="accent-[var(--accent)]"
+              className="accent-(--accent)"
               type="checkbox"
               checked={background}
               onChange={(e) => setBackground(e.target.checked)}
@@ -140,7 +167,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
           </label>
           <label className="inline-flex cursor-pointer items-center gap-1.5">
             <input
-              className="accent-[var(--accent)]"
+              className="accent-(--accent)"
               type="checkbox"
               checked={dark}
               onChange={(e) => setDark(e.target.checked)}
@@ -152,7 +179,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
           >
             <input
               type="checkbox"
-              className="accent-[var(--accent)]"
+              className="accent-(--accent)"
               disabled={!hasSelection}
               checked={onlySelected && hasSelection}
               onChange={(e) => setOnlySelected(e.target.checked)}
@@ -164,12 +191,12 @@ export default function ExportDialog({ board, onClose, onToast }) {
             role="group"
             aria-label="PNG scale"
           >
-            <span className="mr-1 text-[var(--muted)]">PNG scale</span>
+            <span className="mr-1 text-(--muted)">PNG scale</span>
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
                 type="button"
-                className="grid min-h-[30px] min-w-9 flex-none place-items-center rounded-[7px] border-0 bg-[var(--surface-2)] px-1.5 text-[12px] font-medium whitespace-nowrap aria-pressed:bg-[var(--accent)] aria-pressed:text-[var(--accent-ink)]"
+                className="grid min-h-7.5 min-w-9 flex-none place-items-center rounded-[7px] border-0 bg-(--surface-2) px-1.5 text-[12px] font-medium whitespace-nowrap aria-pressed:bg-(--accent) aria-pressed:text-(--accent-ink)"
                 aria-pressed={scale === n}
                 onClick={() => setScale(n)}
               >
@@ -182,7 +209,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
         <footer className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 font-semibold enabled:hover:bg-[var(--surface-2)] disabled:cursor-not-allowed disabled:opacity-[0.45]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-(--border) bg-(--surface) px-4 font-semibold enabled:hover:bg-(--surface-2) disabled:cursor-not-allowed disabled:opacity-[0.45]"
             disabled={empty}
             onClick={copyPng}
           >
@@ -190,7 +217,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
           </button>
           <button
             type="button"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 font-semibold enabled:hover:bg-[var(--surface-2)] disabled:cursor-not-allowed disabled:opacity-[0.45]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-(--border) bg-(--surface) px-4 font-semibold enabled:hover:bg-(--surface-2) disabled:cursor-not-allowed disabled:opacity-[0.45]"
             disabled={empty}
             onClick={saveSvg}
           >
@@ -198,7 +225,7 @@ export default function ExportDialog({ board, onClose, onToast }) {
           </button>
           <button
             type="button"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-transparent bg-[var(--accent)] px-4 font-semibold text-[var(--accent-ink)] shadow-[var(--shadow)] enabled:hover:brightness-[1.08] disabled:cursor-not-allowed disabled:opacity-[0.45]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-[10px] border border-transparent bg-(--accent) px-4 font-semibold text-(--accent-ink) shadow-(--shadow) enabled:hover:brightness-[1.08] disabled:cursor-not-allowed disabled:opacity-[0.45]"
             disabled={empty}
             onClick={savePng}
           >

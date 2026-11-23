@@ -21,6 +21,12 @@ import {
   snapAngle,
 } from "../lib/geometry.js";
 import { renderScene } from "../lib/render.js";
+import {
+  confirmLargeImage,
+  importImageFile,
+  preloadImages,
+  releaseAllImages,
+} from "../lib/images.js";
 
 const SHAPE_TOOLS = new Set([
   "rectangle",
@@ -40,7 +46,7 @@ const RESIZE_CURSORS = {
   w: "ew-resize",
 };
 
-export default function Canvas({ board }) {
+export default function Canvas({ board, onToast }) {
   const S = board.s;
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
@@ -50,7 +56,9 @@ export default function Canvas({ board }) {
   const pointers = useRef(new Map());
   const overlay = useRef({ marquee: null, erasingIds: null });
   const space = useRef(false);
+  const dragDepth = useRef(0);
   const [cursor, setCursor] = useState("default");
+  const [dropActive, setDropActive] = useState(false);
 
   // ------------------------------------------------------------ painting
   const draw = () => {
@@ -77,6 +85,24 @@ export default function Canvas({ board }) {
     rafRef.current = requestAnimationFrame(draw);
   });
 
+  useEffect(() => () => releaseAllImages(), []);
+
+  useEffect(() => {
+    if (!S.elements.some((el) => el.type === "image")) return undefined;
+    let active = true;
+    preloadImages(S.elements)
+      .then(() => {
+        if (active) board.emit();
+      })
+      .catch((err) => {
+        if (active) onToast?.(err.message);
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [S.elements]);
+
   // Keep the backing store matched to the element size and device pixel ratio.
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -88,6 +114,7 @@ export default function Canvas({ board }) {
       canvas.height = Math.max(1, Math.round(r.height * dpr));
       const first = !sizeRef.current.ready;
       sizeRef.current = { w: r.width, h: r.height, dpr, ready: true };
+      board.setViewport(r.width, r.height);
       // Fresh board: put the origin in the middle of the screen.
       if (first && S.view.x === 0 && S.view.y === 0 && !S.elements.length) {
         board.setView({ x: r.width / 2, y: r.height / 2, zoom: 1 });
@@ -638,6 +665,64 @@ export default function Canvas({ board }) {
     else if (!hit) board.startText(w.x, w.y);
   };
 
+  // ------------------------------------------------------------ image drop
+  const hasFiles = (e) =>
+    Array.from(e.dataTransfer?.types ?? []).includes("Files");
+
+  const onDragEnter = (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth.current += 1;
+    setDropActive(true);
+  };
+
+  const onDragOver = (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const onDragLeave = (e) => {
+    if (!hasFiles(e)) return;
+    dragDepth.current = Math.max(0, dragDepth.current - 1);
+    if (!dragDepth.current) setDropActive(false);
+  };
+
+  const onDrop = async (e) => {
+    if (!hasFiles(e)) return;
+    e.preventDefault();
+    dragDepth.current = 0;
+    setDropActive(false);
+    const file = Array.from(e.dataTransfer.files).find((f) =>
+      f.type.startsWith("image/"),
+    );
+    if (!file) {
+      onToast?.("Drop an image file onto the board");
+      return;
+    }
+    if (!confirmLargeImage(file)) return;
+    try {
+      const image = await importImageFile(file);
+      board.addImage(image, toWorld(e.clientX, e.clientY));
+      onToast?.("Image added to board");
+    } catch (err) {
+      onToast?.(err.message || "Could not add that image");
+    }
+  };
+
+  useEffect(() => {
+    const preventNavigation = (e) => {
+      if (Array.from(e.dataTransfer?.types ?? []).includes("Files"))
+        e.preventDefault();
+    };
+    window.addEventListener("dragover", preventNavigation);
+    window.addEventListener("drop", preventNavigation);
+    return () => {
+      window.removeEventListener("dragover", preventNavigation);
+      window.removeEventListener("drop", preventNavigation);
+    };
+  }, []);
+
   // ------------------------------------------------------------ wheel + keys
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -691,7 +776,15 @@ export default function Canvas({ board }) {
   }, []);
 
   return (
-    <div ref={wrapRef} className="absolute inset-0" data-theme-canvas={S.theme}>
+    <div
+      ref={wrapRef}
+      className="absolute inset-0"
+      data-theme-canvas={S.theme}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <canvas
         ref={canvasRef}
         className="block h-full w-full touch-none select-none dark:filter:invert(93%)_hue-rotate(180deg)"
@@ -703,6 +796,13 @@ export default function Canvas({ board }) {
         onDoubleClick={onDoubleClick}
         onContextMenu={(e) => e.preventDefault()}
       />
+      {dropActive && (
+        <div className="pointer-events-none absolute inset-3 z-20 grid place-items-center rounded-2xl border-2 border-dashed border-(--accent) bg-[color-mix(in_srgb,var(--surface)_72%,transparent)]">
+          <span className="rounded-lg bg-(--surface) px-3 py-1.5 font-semibold text-(--accent) shadow-(--shadow)">
+            Drop image to add to board
+          </span>
+        </div>
+      )}
     </div>
   );
 }

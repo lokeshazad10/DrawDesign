@@ -10,7 +10,7 @@ export default function BoardWorkspace({ board, onExport, onHelp, onToast }) {
 
   return (
     <main className="fixed inset-0">
-      <Canvas board={board} />
+      <Canvas board={board} onToast={onToast} />
       <TextEditor board={board} />
 
       <TopBar
@@ -19,7 +19,7 @@ export default function BoardWorkspace({ board, onExport, onHelp, onToast }) {
         onHelp={onHelp}
         onToast={onToast}
       />
-      <Toolbar board={board} />
+      <Toolbar board={board} onToast={onToast} />
       <PropertiesPanel board={board} />
       <BottomBar board={board} />
 

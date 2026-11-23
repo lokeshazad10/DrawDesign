@@ -112,7 +112,11 @@ export default function PropertiesPanel({ board }) {
 
   const set = (patch, key) => board.applyStyle(patch, key);
   const showBackground = hasType("rectangle", "diamond", "ellipse");
-  const showStroke = !(types.size === 1 && types.has("text"));
+  const showColor = !(types.size === 1 && types.has("image"));
+  const showStroke = !(
+    types.size === 1 &&
+    (types.has("text") || types.has("image"))
+  );
   const showRoughness = hasType(
     "rectangle",
     "diamond",
@@ -128,17 +132,19 @@ export default function PropertiesPanel({ board }) {
       className="absolute top-17 left-3 z-9 flex max-h-[calc(100vh-140px)] w-53 flex-col gap-3.5 overflow-y-auto rounded-(--radius) border border-(--border) bg-(--surface) p-3 shadow-(--shadow) max-[720px]:top-auto max-[720px]:right-2 max-[720px]:bottom-16 max-[720px]:left-2 max-[720px]:max-h-[42vh] max-[720px]:w-auto"
       aria-label="Properties"
     >
-      <section>
-        <h2 className="m-0 mb-1.5 flex justify-between text-[12px] font-medium text-(--muted)">
-          {showText && !showStroke ? "Text colour" : "Stroke"}
-        </h2>
-        <Swatches
-          label="Stroke"
-          colors={STROKE_COLORS}
-          value={val("strokeColor")}
-          onChange={(c) => set({ strokeColor: c }, "strokeColor")}
-        />
-      </section>
+      {showColor && (
+        <section>
+          <h2 className="m-0 mb-1.5 flex justify-between text-[12px] font-medium text-(--muted)">
+            {showText && !showStroke ? "Text colour" : "Stroke"}
+          </h2>
+          <Swatches
+            label="Stroke"
+            colors={STROKE_COLORS}
+            value={val("strokeColor")}
+            onChange={(c) => set({ strokeColor: c }, "strokeColor")}
+          />
+        </section>
+      )}
 
       {showBackground && (
         <section>

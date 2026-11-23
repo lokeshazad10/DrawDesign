@@ -5,7 +5,10 @@ import path from "node:path";
 import { createCanvas, Path2D } from "@napi-rs/canvas";
 import { JSDOM } from "jsdom";
 import { DEFAULT_STYLE } from "../src/features/board/lib/constants.js";
-import { createElement } from "../src/features/board/lib/elements.js";
+import {
+  createElement,
+  createImageElement,
+} from "../src/features/board/lib/elements.js";
 import {
   exportToCanvas,
   exportToSvg,
@@ -161,10 +164,29 @@ test("exportToCanvas crops to content and honours scale and background", () => {
     fs.writeFileSync(path.join(OUT, "export.png"), big.toBuffer("image/png"));
 });
 
-test("exportToSvg produces valid, self-contained SVG", () => {
+test("exportToSvg embeds legacy image data in the SVG", async () => {
   const dom = new JSDOM("<!doctype html><html><body></body></html>");
   globalThis.XMLSerializer = dom.window.XMLSerializer;
-  const svg = exportToSvg(
+  const image = createImageElement(
+    { fileId: "pic", name: "pic.png", width: 40, height: 20 },
+    0,
+    0,
+    DEFAULT_STYLE,
+  );
+  const svg = await exportToSvg(
+    [{ ...image, src: "data:image/png;base64,AAA" }],
+    {},
+    dom.window.document,
+  );
+  const text = svgToString(svg);
+  assert.match(text, /<image/);
+  assert.match(text, /data:image\/png;base64,AAA/);
+});
+
+test("exportToSvg produces valid, self-contained SVG", async () => {
+  const dom = new JSDOM("<!doctype html><html><body></body></html>");
+  globalThis.XMLSerializer = dom.window.XMLSerializer;
+  const svg = await exportToSvg(
     sampleBoard(),
     { background: true },
     dom.window.document,
@@ -177,6 +199,6 @@ test("exportToSvg produces valid, self-contained SVG", () => {
     "rough shapes became paths",
   );
   assert.match(text, /Hello, DrawDesign/);
-  assert.equal(exportToSvg([], {}, dom.window.document), null);
+  assert.equal(await exportToSvg([], {}, dom.window.document), null);
   if (OUT) fs.writeFileSync(path.join(OUT, "export.svg"), text);
 });

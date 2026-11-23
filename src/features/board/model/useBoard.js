@@ -5,16 +5,28 @@
 // closures during a drag, where events arrive faster than React commits.
 // Elements themselves are never mutated, so history is just a stack of arrays.
 
-import { useEffect, useMemo, useReducer, useState } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { DEFAULT_STYLE, MAX_ZOOM, MIN_ZOOM } from '../lib/constants.js';
 import {
   cloneElements,
   createElement,
+  createImageElement,
   getSelectionBounds,
   reorder,
   withMeasuredText,
 } from '../lib/elements.js';
 import { clamp } from '../lib/geometry.js';
+import {
+  clearImages,
+  deleteImage,
+  findRemovedImageKeys,
+  migrateImageElements,
+  pruneImageRecords,
+  releaseAllImages,
+  releaseImage,
+  withoutImageSource,
+  withImageSources,
+} from '../lib/images.js';
 
 const STORAGE_KEY = 'drawdesign:v1';
 const LEGACY_STORAGE_KEY = 'inkboard:v1';
@@ -38,6 +50,10 @@ function initialStore() {
     past: [],
     future: [],
     view: saved?.view ?? { x: 0, y: 0, zoom: 1 },
+    viewport: {
+      w: typeof window === 'undefined' ? 0 : window.innerWidth,
+      h: typeof window === 'undefined' ? 0 : window.innerHeight,
+    },
     tool: 'select',
     selectedIds: [],
     style: { ...DEFAULT_STYLE, ...(saved?.style ?? {}) },
@@ -48,14 +64,15 @@ function initialStore() {
     lastCommit: { key: null, t: 0 },
     clipboard: [],
     pasteCount: 0,
+    migrationDone: false,
   };
 }
 
 export function serializeScene(s) {
   return {
     type: 'drawdesign',
-    version: 1,
-    elements: s.elements,
+    version: 2,
+    elements: s.elements.map(withoutImageSource),
     view: s.view,
     style: s.style,
     grid: s.grid,
@@ -63,12 +80,34 @@ export function serializeScene(s) {
   };
 }
 
-export function useBoard() {
+export async function exportScene(s) {
+  return {
+    type: 'drawdesign',
+    version: 2,
+    elements: await withImageSources(s.elements.map(withoutImageSource)),
+    view: s.view,
+    style: s.style,
+    grid: s.grid,
+    theme: s.theme,
+  };
+}
+
+export function useBoard({ onError } = {}) {
   const [, bump] = useReducer((n) => n + 1, 0);
   const [S] = useState(initialStore);
+  const errorRef = useRef(onError);
+  const emit = () => bump();
+
+  useEffect(() => {
+    errorRef.current = onError;
+  }, [onError]);
+
+  const reportError = (err) => {
+    const message = typeof err === 'string' ? err : err?.message;
+    errorRef.current?.(message || 'Image storage error');
+  };
 
   const api = useMemo(() => {
-    const emit = () => bump();
     const ids = () => new Set(S.selectedIds);
     const selectedElements = () => S.elements.filter((el) => ids().has(el.id));
     const pruneSelection = () => {
@@ -86,7 +125,15 @@ export function useBoard() {
     const discardCheckpoint = () => {
       S.elements = S.past.pop() ?? S.elements;
     };
+    const cleanupRemovedImages = (previous, next) => {
+      const clipboardIds = S.clipboard.map((el) => el.fileId);
+      for (const fileId of findRemovedImageKeys(previous, next, clipboardIds)) {
+        releaseImage(fileId);
+        deleteImage(fileId).catch(reportError);
+      }
+    };
     const replace = (next) => {
+      cleanupRemovedImages(S.elements, next);
       S.elements = next;
       emit();
     };
@@ -119,6 +166,11 @@ export function useBoard() {
     // ------------------------------------------------ view
     const setView = (view) => {
       S.view = view;
+      emit();
+    };
+    const setViewport = (w, h) => {
+      if (S.viewport.w === w && S.viewport.h === h) return;
+      S.viewport = { w, h };
       emit();
     };
     const zoomAt = (factor, cx, cy) => {
@@ -199,6 +251,24 @@ export function useBoard() {
       commit([...S.elements, ...copies]);
       S.tool = 'select';
       select(copies.map((c) => c.id));
+    };
+
+    const addImage = (image, point) => {
+      if (!image?.fileId) return;
+      const { view, viewport } = S;
+      const center = point ?? {
+        x: (viewport.w / 2 - view.x) / view.zoom,
+        y: (viewport.h / 2 - view.y) / view.zoom,
+      };
+      const base = createImageElement(image, 0, 0, S.style);
+      const el = {
+        ...base,
+        x: center.x - base.width / 2,
+        y: center.y - base.height / 2,
+      };
+      commit([...S.elements, el]);
+      S.tool = 'select';
+      S.selectedIds = [el.id];
     };
 
     const nudge = (dx, dy) => {
@@ -290,16 +360,26 @@ export function useBoard() {
       if (!S.elements.length) return;
       commit([]);
       S.selectedIds = [];
+      S.clipboard = [];
+      releaseAllImages();
+      clearImages().catch(reportError);
       emit();
     };
-    const loadScene = (data) => {
+    const loadScene = async (data) => {
       if (!data || !['drawdesign', 'inkboard'].includes(data.type) || !Array.isArray(data.elements)) {
         throw new Error('Not a DrawDesign file');
       }
+      const { elements } = await migrateImageElements(data.elements);
+      const previous = S.elements;
       checkpoint();
-      S.elements = data.elements;
+      S.elements = elements;
       S.selectedIds = [];
+      S.clipboard = [];
       if (data.view) S.view = data.view;
+      cleanupRemovedImages(previous, elements);
+      const keep = elements.map((el) => el.fileId);
+      pruneImageRecords(keep).catch(reportError);
+      S.migrationDone = true;
       emit();
     };
     const remeasureText = () => {
@@ -311,9 +391,9 @@ export function useBoard() {
 
     return {
       checkpoint, discardCheckpoint, replace, commit, undo, redo,
-      setView, zoomAt, zoomTo, fitToContent,
+      setView, setViewport, zoomAt, zoomTo, fitToContent,
       select, setTool, toggleLock, toggleGrid, toggleTheme, selectAll,
-      deleteSelected, duplicate, copy, cut, paste, nudge, reorderSelected, applyStyle,
+      deleteSelected, duplicate, copy, cut, paste, addImage, nudge, reorderSelected, applyStyle,
       startText, editText, finishEditing,
       clearScene, loadScene, remeasureText,
       emit,
@@ -322,13 +402,35 @@ export function useBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    migrateImageElements(S.elements)
+      .then(({ elements, changed }) => {
+        if (active && changed) {
+          S.elements = elements;
+          emit();
+        }
+      })
+      .catch(reportError)
+      .finally(() => {
+        if (!active) return;
+        S.migrationDone = true;
+        emit();
+      });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Persist (debounced) after anything changes.
   useEffect(() => {
+    if (!S.migrationDone) return undefined;
     const t = setTimeout(() => {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeScene(S)));
       } catch {
-        /* storage full or unavailable: the board still works in memory */
+        reportError('Board storage is full or unavailable; recent changes were not saved.');
       }
     }, 400);
     return () => clearTimeout(t);
