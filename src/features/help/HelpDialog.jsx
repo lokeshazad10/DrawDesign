@@ -62,23 +62,23 @@ export default function HelpDialog({ onClose }) {
       onPointerDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="max-h-[calc(100vh-32px)] w-[min(820px,100%)] overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-[18px] shadow-[var(--shadow)] outline-none"
+        className="max-h-[calc(100vh-32px)] w-[min(820px,100%)] overflow-auto rounded-2xl border border-(--border) bg-(--surface) p-4.5 shadow-(--shadow) outline-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-title"
         tabIndex={-1}
         ref={ref}
       >
-        <header className="mb-[14px] flex items-center justify-between">
+        <header className="mb-3.5 flex items-center justify-between">
           <h2
             id="help-title"
-            className="m-0 font-[family-name:var(--font-display)] text-[20px] font-bold tracking-[-0.01em]"
+            className="m-0 font-(family-name:--font-display) text-[20px] font-bold tracking-[-0.01em]"
           >
             Keyboard shortcuts
           </h2>
           <button
             type="button"
-            className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent p-0 hover:bg-[var(--surface-2)]"
+            className="grid h-8 w-8 place-items-center rounded-lg border-0 bg-transparent p-0 hover:bg-(--surface-2)"
             aria-label="Close"
             onClick={onClose}
           >
@@ -92,12 +92,12 @@ export default function HelpDialog({ onClose }) {
               <dl className="m-0">
                 {g.rows.map(([name, keys]) => (
                   <div
-                    className="flex justify-between gap-3 border-b border-[var(--border)] py-[5px]"
+                    className="flex justify-between gap-3 border-b border-(--border) py-1.25"
                     key={name}
                   >
-                    <dt className="text-[var(--muted)]">{name}</dt>
+                    <dt className="text-(--muted)">{name}</dt>
                     <dd className="m-0 text-right">
-                      <kbd className="rounded-[5px] border border-[var(--border)] bg-[var(--surface-2)] px-1.5 py-px">
+                      <kbd className="rounded-[5px] border border-(--border) bg-(--surface-2) px-1.5 py-px">
                         {keys}
                       </kbd>
                     </dd>
