@@ -1,6 +1,6 @@
 # DrawDesign
 
-**Sketchboard** is the entry point at `/`. The DrawDesign product website is available at `/website`.
+**Sketchboard** is the entry point at `/`. The DrawDesign product website is available at `/website/`.
 
 [![Build](https://img.shields.io/badge/build-Vite-success)](#development)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -82,7 +82,7 @@ npm run dev
 ```
 
 Open the URL Vite prints (by default, <http://localhost:5173>) for Sketchboard.
-Open <http://localhost:5173/website> for the DrawDesign website. Changes are reloaded during development.
+Open <http://localhost:5173/website/> for the DrawDesign website. Changes are reloaded during development. The production build includes a separate website entry page so direct visits work on static hosts without SPA rewrites.
 
 ## Available scripts
 
