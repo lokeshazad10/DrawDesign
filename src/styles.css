@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
@@ -28,6 +29,16 @@
     color-scheme: light;
   }
 
+  @font-face {
+    font-family: "handwriting";
+    src: url("/fonts/shantell-sans.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @theme {
+    --font-handwriting: "handwriting", sans-serif;
+  }
   :root[data-theme="dark"] {
     --bg: #111418;
     --surface: #1a1e24;
