@@ -41,6 +41,9 @@ export function createElement(type, x, y, style) {
     roughness: style.roughness,
     opacity: style.opacity,
   };
+  if (type === "rectangle") {
+    el.borderRadius = 0;
+  }
   if (type === "line" || type === "arrow" || type === "freedraw") {
     el.points = [[0, 0]];
     el.backgroundColor = "transparent";
