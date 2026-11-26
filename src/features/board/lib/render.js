@@ -65,6 +65,24 @@ function arrowHeadSegments(el) {
   ]);
 }
 
+// SVG path for a rectangle with uniform rounded corners.
+// The radius is clamped so it never exceeds half of the shorter side.
+export function roundedRectPath(x, y, w, h, radius) {
+  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
+  return [
+    `M${x + r} ${y}`,
+    `L${x + w - r} ${y}`,
+    `A${r} ${r} 0 0 1 ${x + w} ${y + r}`,
+    `L${x + w} ${y + h - r}`,
+    `A${r} ${r} 0 0 1 ${x + w - r} ${y + h}`,
+    `L${x + r} ${y + h}`,
+    `A${r} ${r} 0 0 1 ${x} ${y + h - r}`,
+    `L${x} ${y + r}`,
+    `A${r} ${r} 0 0 1 ${x + r} ${y}`,
+    "Z",
+  ].join(" ");
+}
+
 // Returns rough drawables for roughjs-drawn types; empty for freedraw / text.
 export function getDrawables(el) {
   const cached = drawableCache.get(el);
@@ -75,8 +93,14 @@ export function getDrawables(el) {
   let drawables = [];
   switch (el.type) {
     case "rectangle":
-      if (b.w >= 1 && b.h >= 1)
-        drawables = [generator.rectangle(b.x, b.y, b.w, b.h, opts)];
+      if (b.w >= 1 && b.h >= 1) {
+        const radius = el.borderRadius ?? 0;
+        drawables = [
+          radius > 0
+            ? generator.path(roundedRectPath(b.x, b.y, b.w, b.h, radius), opts)
+            : generator.rectangle(b.x, b.y, b.w, b.h, opts),
+        ];
+      }
       break;
     case "diamond":
       if (b.w >= 1 && b.h >= 1)
