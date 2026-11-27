@@ -41,7 +41,7 @@ export function createElement(type, x, y, style) {
     roughness: style.roughness,
     opacity: style.opacity,
   };
-  if (type === "rectangle") {
+  if (type === "rectangle" || type === "diamond") {
     el.borderRadius = 0;
   }
   if (type === "line" || type === "arrow" || type === "freedraw") {
