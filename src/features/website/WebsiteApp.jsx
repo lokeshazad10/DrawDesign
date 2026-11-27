@@ -1,82 +1,40 @@
 import {
-  ArrowRight,
+  ArrowDownRight,
   ArrowUpRight,
   Download,
-  Lightbulb,
-  Network,
+  MousePointer2,
   Pencil,
   Shapes,
-  Star,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import { heroSketchboardAnimation } from "./animations/animate";
-import Navbar from "./layout/Navbar";
-import Sketchboard from "./components/Sketchboard";
-import Button from "./components/Button";
-
-const containerClass =
-  "mx-auto w-[min(1180px,calc(100%-64px))] max-[560px]:w-[calc(100%-36px)]";
-const eyebrowClass =
-  "m-0 text-[12px] leading-[1.4] font-bold tracking-[1.6px] text-(--accent) uppercase";
-const linkClass = "no-underline transition-colors duration-150";
+import { useEffect } from "react";
+import boardPreview from "../../../docs/images/screenshot.png";
 
 const features = [
   {
     icon: Pencil,
-    title: "Keep it hand-drawn",
+    title: "Keep it loose",
     description:
-      "Make diagrams feel personal with an organic sketch style that keeps the focus on your ideas.",
+      "A warm, hand-drawn feel makes it easy to start before everything is figured out.",
   },
   {
-    icon: Network,
-    title: "Make connections clear",
+    icon: MousePointer2,
+    title: "Think on an open canvas",
     description:
-      "Arrange shapes, notes, and connectors into diagrams that are easy to follow at a glance.",
+      "Move freely between rough sketches, diagrams, notes, and the ideas connecting them.",
   },
   {
     icon: Download,
-    title: "Take your work with you",
+    title: "Take your ideas with you",
     description:
-      "Export your finished board and bring your ideas into your next conversation or document.",
+      "Save boards locally and export a crisp PNG or SVG whenever you are ready to share.",
   },
 ];
 
-const steps = [
-  {
-    number: "01",
-    title: "Start with a blank canvas",
-    description: "Open a board and put the first thought anywhere.",
-  },
-  {
-    number: "02",
-    title: "Sketch the big picture",
-    description: "Add shapes, labels, and connections as the idea takes form.",
-  },
-  {
-    number: "03",
-    title: "Refine and share",
-    description: "Tidy up your diagram, then export it when it feels right.",
-  },
-];
-
-const useCases = [
-  {
-    icon: Network,
-    title: "System diagrams",
-    description: "Map services, flows, and the connections between them.",
-  },
-  {
-    icon: Shapes,
-    title: "Wireframes",
-    description: "Explore page layouts and interface ideas before polishing.",
-  },
-  {
-    icon: Lightbulb,
-    title: "Brainstorming",
-    description: "Collect thoughts, group them, and find a direction together.",
-  },
-];
+const containerClass =
+  "mx-auto w-[min(1180px,calc(100%-64px))] max-[560px]:w-[calc(100%-36px)]";
+const eyebrowClass =
+  "m-0 text-[12px] leading-[1.4] font-bold tracking-[1.6px] text-[#6f7d45] uppercase";
+const linkClass = "no-underline transition-colors duration-150";
 
 export default function WebsiteApp() {
   useEffect(() => {
@@ -87,119 +45,158 @@ export default function WebsiteApp() {
     };
   }, []);
 
-  //gsap animation for hero section
-  const sectionRef = useRef(null);
-  const cardRef = useRef(null);
-
-  useGSAP(
-    () => {
-      return heroSketchboardAnimation({
-        section: sectionRef.current,
-        card: cardRef.current,
-      });
-    },
-    { scope: sectionRef },
-  );
-
   return (
-    <main className="overflow-y-hidden min-h-screen min-w-0 bg-(--bg) bg-[radial-gradient(circle,#d9dde3_1.25px,transparent_1px)] bg-size-[20px_20px] font-(family-name:--font-ui) text-(--text) antialiased">
-      {/* Navbar component */}
-      <Navbar />
-      <div
-        ref={sectionRef}
-        className="relative z-0 flow-root min-h-[calc(100svh-4rem)] max-[850px]:min-h-0"
+    <main className="min-h-screen min-w-[320px] bg-[#f8f8f4] font-(family-name:--font-ui) text-[#292b25] antialiased">
+      <header
+        className={`${containerClass} flex h-22 items-center justify-between border-b border-[#e8e9e1] max-[560px]:h-18`}
       >
-        <section
-          className={`${containerClass} flex min-h-[calc(100svh-4rem)] items-center justify-center max-[850px]:min-h-0 max-[850px]:py-10`}
+        <a
+          className={`${linkClass} inline-flex items-center gap-2.5 text-[19px] font-bold tracking-[-0.8px] text-[#292b25] max-[560px]:gap-2 max-[560px]:text-[17px]`}
+          href="/website"
+          aria-label="DrawDesign home"
         >
-          <div className="relative sm:mt-10 z-1 max-[850px]:max-w-150 flex items-center justify-center flex-col">
-            <p
-              className={`${eyebrowClass} bg-[#3cc0d457] text-center inline-block px-4 py-2 rounded-full`}
-            >
-              100% Free & Open-Source | No Login Required
-            </p>
-            <h1 className="mt-0 mb-5.5 py-4 font-handwriting text-center text-[clamp(62px,7.3vw,94px)] leading-[0.91] font-semibold tracking-[-7px] max-[560px]:text-[58px] max-[560px]:tracking-[-5px]">
-              Diagrams that feel <br />{" "}
-              <span className="text-(--accent)">hand-drawn</span>, crafted in
-              seconds.
-            </h1>
-            <p className="mt-0 mb-7.5 max-w-200 text-center text-[17px] leading-[1.65] text-[#66685f] max-[560px]:text-[15px]">
-              DrawDesign is the intuitive virtual whiteboard designed to sketch
-              system architecture, wireframes, mind maps, and quick ideas with
-              an organic hand-crafted pencil aesthetic.
-            </p>
-            <div className="flex flex-wrap items-center gap-5.75 max-[560px]:items-start max-[560px]:flex-col max-[560px]:gap-4 text-(--accent)">
-              {/* <a
-                className={`${linkClass} inline-flex min-h-12.5 items-center justify-center gap-3 rounded-lg bg-(--accent) px-4.75 text-sm font-bold text-white hover:-translate-y-0.5 hover:text-(--accent) hover:bg-[#3cc0d457] transition ease-in-out duration-300`}
-                href="/"
-              >
-                Start sketching <ArrowUpRight size={18} aria-hidden="true" />
-              </a> */}
-              <Button
-                href={"/"}
-                title="Start Sketching"
-                icon={<ArrowUpRight size={18} aria-hidden="true" />}
-                bgColor="bg-(--accent)"
-                textColor="text-(--bg)"
-              />
-              <Button
-                href="https://github.com/lokeshazad10/DrawDesign"
-                target="_blank"
-                rel="noreferrer"
-                title="Star on Github"
-                icon={<Star size={16} aria-hidden="true" />}
-              />
-              {/* <a
-                className={`${linkClass} inline-flex items-center gap-1.25 font-bold text-(--text) hover:text-(--accent) transition ease-in-out duration-300 text-sm`}
-                href="#features"
-              >
-                <Star size={16} aria-hidden="true" />
-                Star on Github
-              </a> */}
-            </div>
-            <p className="mt-4.5 mb-0 text-[12px] text-[#888a80]">
-              Free to use · Your boards stay in your browser
-            </p>
-          </div>
-        </section>
-        <Sketchboard
-          ref={cardRef}
-          className="absolute inset-0 z-20 flex items-center justify-center max-[850px]:relative max-[850px]:inset-auto max-[850px]:z-0 max-[850px]:mt-4"
-        />
-      </div>
+          <img
+            className="size-7.75 object-contain"
+            src="/DrawDesign.svg"
+            alt=""
+            aria-hidden="true"
+          />
+          <span>drawdesign</span>
+        </a>
+        <nav
+          className="flex items-center gap-8.75 text-[14px] font-medium text-[#55574f] max-[560px]:gap-0"
+          aria-label="Main navigation"
+        >
+          <a
+            className={`${linkClass} text-[#55574f] hover:text-[#6a811f] max-[560px]:hidden`}
+            href="#features"
+          >
+            Why DrawDesign
+          </a>
+          <a
+            className={`${linkClass} inline-flex items-center gap-1.75 font-bold text-[#292b25] hover:text-[#6a811f] max-[560px]:text-[12px]`}
+            href="/"
+          >
+            Open Sketchboard <ArrowUpRight size={16} aria-hidden="true" />
+          </a>
+        </nav>
+      </header>
 
       <section
-        className={`${containerClass} scroll-mt-20 pt-15 pb-26.5 max-[560px]:pt-2.5 max-[560px]:pb-19`}
+        className={`${containerClass} grid min-h-155 grid-cols-[0.88fr_1.12fr] items-center gap-7.5 pt-17.5 pb-23.75 max-[850px]:grid-cols-1 max-[850px]:gap-15 max-[850px]:pt-18 max-[850px]:pb-22.5 max-[560px]:min-h-0 max-[560px]:gap-12 max-[560px]:pt-16.25 max-[560px]:pb-19`}
+      >
+        <div className="relative z-1 max-[850px]:max-w-150">
+          <p className={`${eyebrowClass} mb-0 flex items-center gap-2.25`}>
+            <span
+              className="size-2 rounded-full bg-[#9ab64d]"
+              aria-hidden="true"
+            />
+            A little space to think
+          </p>
+          <h1 className="mt-0 mb-5.5 text-[clamp(62px,7.3vw,94px)] leading-[0.91] font-semibold tracking-[-7px] max-[560px]:text-[58px] max-[560px]:tracking-[-5px]">
+            Make room
+            <br />
+            for{" "}
+            <span className="font-medium text-[#819943] italic">ideas.</span>
+          </h1>
+          <p className="mt-0 mb-7.5 max-w-110 text-[17px] leading-[1.65] text-[#66685f] max-[560px]:text-[15px]">
+            The best ideas rarely arrive fully formed. Sketch them out, move
+            things around, and see where your thinking takes you.
+          </p>
+          <div className="flex flex-wrap items-center gap-5.75 max-[560px]:items-start max-[560px]:flex-col max-[560px]:gap-4">
+            <a
+              className={`${linkClass} inline-flex min-h-12.5 items-center justify-center gap-3 rounded-lg bg-[#292b25] px-4.75 text-[14px] font-bold text-white hover:-translate-y-0.5 hover:bg-[#42453b]`}
+              href="/"
+            >
+              Start sketching <ArrowUpRight size={18} aria-hidden="true" />
+            </a>
+            <a
+              className={`${linkClass} inline-flex items-center gap-1.25 text-[13px] font-semibold text-[#55574f] hover:text-[#6a811f]`}
+              href="#features"
+            >
+              Get to know the canvas{" "}
+              <ArrowDownRight size={16} aria-hidden="true" />
+            </a>
+          </div>
+          <p className="mt-4.5 mb-0 text-[12px] text-[#888a80]">
+            Free to use · Your boards stay in your browser
+          </p>
+        </div>
+
+        <div className="relative py-7.5 pr-0 pb-2.5 pl-6 max-[850px]:mx-auto max-[850px]:w-[min(680px,calc(100%-30px))] max-[560px]:w-[calc(100%-10px)] max-[560px]:pl-2">
+          <div
+            className="absolute -top-0.75 right-[12%] z-1 grid justify-items-center text-[16px] text-[#809443] italic rotate-[7deg] max-[560px]:right-[7%] max-[560px]:text-[13px]"
+            aria-hidden="true"
+          >
+            <span>ideas welcome</span>
+            <svg
+              className="-ml-11.25 h-9 w-16.5"
+              viewBox="0 0 100 48"
+              fill="none"
+            >
+              <path
+                d="M4 8c27 2 45 14 67 31m0 0-3-15m3 15 15-6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-[#e4e5dc] bg-white shadow-[0_25px_65px_rgba(46,49,36,0.12)] rotate-[1.2deg]">
+            <div className="flex h-10.5 items-center gap-3 border-b border-[#efefe9] px-3.5 text-[11px] text-[#797b73]">
+              <span className="inline-flex gap-1" aria-hidden="true">
+                <i className="size-1.75 rounded-full bg-[#e2e3dc]" />
+                <i className="size-1.75 rounded-full bg-[#e2e3dc]" />
+                <i className="size-1.75 rounded-full bg-[#e2e3dc]" />
+              </span>
+              <span>Untitled board</span>
+              <span className="ml-auto text-[9px] font-bold tracking-[1px] text-[#85877e]">
+                SKETCHBOARD
+              </span>
+            </div>
+            <img
+              className="block h-auto w-full"
+              src={boardPreview}
+              alt="Sketchboard canvas with colorful hand-drawn shapes and notes"
+            />
+          </div>
+          <div
+            className="absolute -right-3.75 -bottom-0.75 flex items-center gap-2.25 rounded-[9px] border border-[#e2e4d8] bg-[#fffef9] px-3.75 py-3 text-[13px] font-semibold shadow-lg -rotate-3 max-[560px]:-right-2.25 max-[560px]:px-2.75 max-[560px]:py-2.75 max-[560px]:text-[11px]"
+            aria-hidden="true"
+          >
+            <Shapes className="text-[#809443]" size={22} strokeWidth={1.7} />
+            <span>Start anywhere.</span>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className={`${containerClass} pt-11 pb-26.5 max-[560px]:pt-2.5 max-[560px]:pb-19`}
         id="features"
-        aria-labelledby="features-title"
       >
         <div className="mb-9.5 text-center max-[560px]:text-left">
           <p className={eyebrowClass}>Less polish. More possibility.</p>
-          <h2
-            id="features-title"
-            className="mt-3 mb-0 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px] max-[560px]:text-[34px]"
-          >
+          <h2 className="mt-3 mb-0 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px] max-[560px]:text-[34px]">
             A canvas that gets out of your way.
           </h2>
-          <p className="mx-auto mt-3 mb-0 max-w-150 text-[16px] leading-[1.65] text-(--muted) max-[560px]:mx-0 max-[560px]:text-[15px]">
-            From the first rough line to a diagram worth sharing, keep your
-            thinking simple and visual.
-          </p>
         </div>
-        <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
+        <div className="grid grid-cols-3 gap-3.75 max-[850px]:grid-cols-1">
           {features.map(({ icon: Icon, title, description }, index) => (
             <article
+              className="relative min-h-51.25 rounded-[10px] border border-[#e7e8df] bg-[#fbfbf8] p-6 max-[850px]:min-h-0"
               key={title}
-              className="rounded-2xl border border-(--border) bg-(--surface) p-6 shadow-[0_8px_24px_-20px_rgba(20,24,31,0.35)] max-[560px]:p-5"
             >
-              <div className="mb-7 flex size-11 items-center justify-center rounded-xl bg-(--accent-soft) text-(--accent)">
+              <div className="grid size-10 place-items-center rounded-[11px] bg-[#eff2e3] text-[#6f813b]">
                 <Icon size={21} strokeWidth={1.8} aria-hidden="true" />
               </div>
-              <p className={`${eyebrowClass} mb-2`}>0{index + 1}</p>
-              <h3 className="mt-0 mb-2 text-[20px] font-semibold tracking-[-0.5px]">
+              <span className="absolute top-7 right-6 text-[11px] font-bold tracking-[1px] text-[#a3a59b]">
+                0{index + 1}
+              </span>
+              <h3 className="mt-6 mb-1.75 text-[19px] font-semibold tracking-[-0.5px]">
                 {title}
               </h3>
-              <p className="m-0 text-[14px] leading-[1.7] text-(--muted)">
+              <p className="mb-0 max-w-75 text-[14px] leading-[1.55] text-[#77796f] max-[850px]:max-w-135">
                 {description}
               </p>
             </article>
@@ -207,102 +204,20 @@ export default function WebsiteApp() {
         </div>
       </section>
 
-      <section
-        id="how-it-works"
-        aria-labelledby="how-it-works-title"
-        className={`${containerClass} scroll-mt-20 mb-24 grid grid-cols-[0.8fr_1.2fr] items-start gap-12 max-[760px]:mb-18 max-[760px]:grid-cols-1 max-[760px]:gap-8`}
-      >
+      <section className="mx-auto mb-15 flex min-h-51.25 w-[min(1180px,calc(100%-64px))] items-center justify-between gap-6 rounded-xl bg-[#30332b] px-14 py-9 text-white max-[560px]:mb-10 max-[560px]:w-[calc(100%-36px)] max-[560px]:items-start max-[560px]:flex-col max-[560px]:px-6.25 max-[560px]:py-7.5">
         <div>
-          <p className={eyebrowClass}>A little goes a long way</p>
-          <h2
-            id="how-it-works-title"
-            className="mt-3 mb-3 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px]"
-          >
-            From first thought to clear picture.
-          </h2>
-          <p className="m-0 max-w-110 text-[15px] leading-[1.7] text-(--muted)">
-            No complicated setup. Just open your canvas and let the idea lead.
-          </p>
-        </div>
-        <ol className="m-0 grid list-none gap-3 p-0">
-          {steps.map(({ number, title, description }) => (
-            <li
-              key={number}
-              className="flex items-start gap-4 rounded-xl border border-(--border) bg-(--surface) p-4.5 max-[560px]:p-4"
-            >
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-(--accent-soft) text-[12px] font-bold text-(--accent)">
-                {number}
-              </span>
-              <div>
-                <h3 className="mt-0 mb-1 text-[16px] font-semibold">{title}</h3>
-                <p className="m-0 text-[14px] leading-[1.6] text-(--muted)">
-                  {description}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section
-        id="use-cases"
-        aria-labelledby="use-cases-title"
-        className={`${containerClass} scroll-mt-20 mb-24 max-[760px]:mb-18`}
-      >
-        <div className="mb-8 text-center max-[560px]:text-left">
-          <p className={eyebrowClass}>Think out loud</p>
-          <h2
-            id="use-cases-title"
-            className="mt-3 mb-0 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px] max-[560px]:text-[34px]"
-          >
-            One canvas, plenty of possibilities.
-          </h2>
-        </div>
-        <div className="grid grid-cols-3 gap-5 max-[760px]:grid-cols-1">
-          {useCases.map(({ icon: Icon, title, description }) => (
-            <article
-              key={title}
-              className="flex items-start gap-4 rounded-2xl bg-(--surface-2) p-5.5 max-[560px]:p-5"
-            >
-              <Icon
-                className="mt-0.5 shrink-0 text-(--accent)"
-                size={21}
-                strokeWidth={1.8}
-                aria-hidden="true"
-              />
-              <div>
-                <h3 className="mt-0 mb-1.5 text-[17px] font-semibold">
-                  {title}
-                </h3>
-                <p className="m-0 text-[14px] leading-[1.65] text-(--muted)">
-                  {description}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section
-        aria-labelledby="cta-title"
-        className={`${containerClass} mb-15 flex min-h-51.25 items-center justify-between gap-6 rounded-2xl bg-(--text) px-14 py-9 text-(--bg) max-[560px]:mb-10 max-[560px]:items-start max-[560px]:flex-col max-[560px]:px-6.25 max-[560px]:py-7.5`}
-      >
-        <div>
-          <p className={`${eyebrowClass} text-(--accent)`}>
+          <p className={`${eyebrowClass} text-[#d9f27e]`}>
             Your next idea is waiting
           </p>
-          <h2
-            id="cta-title"
-            className="mt-2.5 mb-0 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px]"
-          >
+          <h2 className="mt-2.5 mb-0 text-[clamp(30px,4vw,43px)] leading-tight font-medium tracking-[-2px]">
             Start with a scribble.
           </h2>
         </div>
         <a
-          className={`${linkClass} inline-flex min-h-12.5 shrink-0 items-center justify-center gap-3 rounded-lg bg-(--accent) px-4.75 text-[14px] font-bold text-(--accent-ink) hover:-translate-y-0.5 hover:brightness-110`}
+          className={`${linkClass} inline-flex min-h-12.5 shrink-0 items-center justify-center gap-3 rounded-lg bg-[#d9f27e] px-4.75 text-[14px] font-bold text-[#292b25] hover:-translate-y-0.5 hover:bg-[#e4fa9b]`}
           href="/"
         >
-          Open Sketchboard <ArrowRight size={18} aria-hidden="true" />
+          Open Sketchboard <ArrowUpRight size={18} aria-hidden="true" />
         </a>
       </section>
 
