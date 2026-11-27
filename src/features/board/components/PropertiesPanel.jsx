@@ -99,7 +99,7 @@ export default function PropertiesPanel({ board }) {
   const hasType = (...list) => list.some((t) => types.has(t));
   const isShape = (e) =>
     e.type === "rectangle" || e.type === "diamond" || e.type === "ellipse";
-  const isRectangle = (e) => e.type === "rectangle";
+  const hasRadius = (e) => e.type === "rectangle" || e.type === "diamond";
 
   // The value shared by the selection (undefined when mixed), or the default style.
   const val = (key, pred = () => true) => {
@@ -126,11 +126,11 @@ export default function PropertiesPanel({ board }) {
     "arrow",
   );
   const showText = hasType("text");
-  // Corner radius applies to existing rectangles only, so show it when at least
-  // one rectangle is selected.
-  const showRadius = selected.some(isRectangle);
+  // Corner radius applies to rectangles and diamonds, so show it when at least
+  // one of them is selected.
+  const showRadius = selected.some(hasRadius);
   const bg = val("backgroundColor", isShape);
-  const radius = val("borderRadius", isRectangle);
+  const radius = val("borderRadius", hasRadius);
 
   return (
     <aside
