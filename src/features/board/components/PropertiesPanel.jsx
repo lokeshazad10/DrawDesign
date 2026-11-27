@@ -99,6 +99,7 @@ export default function PropertiesPanel({ board }) {
   const hasType = (...list) => list.some((t) => types.has(t));
   const isShape = (e) =>
     e.type === "rectangle" || e.type === "diamond" || e.type === "ellipse";
+  const hasRadius = (e) => e.type === "rectangle" || e.type === "diamond";
 
   // The value shared by the selection (undefined when mixed), or the default style.
   const val = (key, pred = () => true) => {
@@ -125,7 +126,11 @@ export default function PropertiesPanel({ board }) {
     "arrow",
   );
   const showText = hasType("text");
+  // Corner radius applies to rectangles and diamonds, so show it when at least
+  // one of them is selected.
+  const showRadius = selected.some(hasRadius);
   const bg = val("backgroundColor", isShape);
+  const radius = val("borderRadius", hasRadius);
 
   return (
     <aside
@@ -229,6 +234,27 @@ export default function PropertiesPanel({ board }) {
               { value: 1, label: "Loose", title: "Artist: slightly loose" },
               { value: 2, label: "Wild", title: "Cartoonist: very loose" },
             ]}
+          />
+        </section>
+      )}
+
+      {showRadius && (
+        <section>
+          <h2 className="m-0 mb-1.5 flex justify-between text-[12px] font-medium text-(--muted)">
+            Corner radius{" "}
+            <span>{radius === undefined ? "mixed" : `${radius ?? 0}px`}</span>
+          </h2>
+          <input
+            className="w-full accent-(--accent)"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            aria-label="Corner radius"
+            value={radius ?? 0}
+            onChange={(e) =>
+              set({ borderRadius: Number(e.target.value) }, "borderRadius")
+            }
           />
         </section>
       )}

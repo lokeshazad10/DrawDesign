@@ -65,6 +65,57 @@ function arrowHeadSegments(el) {
   ]);
 }
 
+// SVG path for a rectangle with uniform rounded corners.
+// The radius is clamped so it never exceeds half of the shorter side.
+export function roundedRectPath(x, y, w, h, radius) {
+  const r = Math.max(0, Math.min(radius, w / 2, h / 2));
+  return [
+    `M${x + r} ${y}`,
+    `L${x + w - r} ${y}`,
+    `A${r} ${r} 0 0 1 ${x + w} ${y + r}`,
+    `L${x + w} ${y + h - r}`,
+    `A${r} ${r} 0 0 1 ${x + w - r} ${y + h}`,
+    `L${x + r} ${y + h}`,
+    `A${r} ${r} 0 0 1 ${x} ${y + h - r}`,
+    `L${x} ${y + r}`,
+    `A${r} ${r} 0 0 1 ${x + r} ${y}`,
+    "Z",
+  ].join(" ");
+}
+
+// SVG path for a polygon with rounded corners (used for diamonds).
+// Each corner is replaced by a circular arc; the radius is limited so the arcs
+// never overlap along an edge.
+export function roundedPolygonPath(points, radius) {
+  const n = points.length;
+  const f = (v) => Math.round(v * 100) / 100;
+  let d = "";
+  for (let i = 0; i < n; i++) {
+    const prev = points[(i - 1 + n) % n];
+    const curr = points[i];
+    const next = points[(i + 1) % n];
+    const l1 = Math.hypot(prev[0] - curr[0], prev[1] - curr[1]);
+    const l2 = Math.hypot(next[0] - curr[0], next[1] - curr[1]);
+    const v1 = [(prev[0] - curr[0]) / l1, (prev[1] - curr[1]) / l1];
+    const v2 = [(next[0] - curr[0]) / l2, (next[1] - curr[1]) / l2];
+    const dot = Math.max(-1, Math.min(1, v1[0] * v2[0] + v1[1] * v2[1]));
+    const half = Math.tan(Math.acos(dot) / 2);
+    const t = Math.min(radius / half, l1 / 2, l2 / 2);
+    if (!(t > 0) || !Number.isFinite(t)) {
+      d += `${i === 0 ? "M" : "L"}${f(curr[0])} ${f(curr[1])} `;
+      continue;
+    }
+    const r = t * half;
+    const sx = curr[0] + v1[0] * t;
+    const sy = curr[1] + v1[1] * t;
+    const ex = curr[0] + v2[0] * t;
+    const ey = curr[1] + v2[1] * t;
+    const cross = -(v1[0] * v2[1] - v1[1] * v2[0]);
+    d += `${i === 0 ? "M" : "L"}${f(sx)} ${f(sy)} A${f(r)} ${f(r)} 0 0 ${cross > 0 ? 1 : 0} ${f(ex)} ${f(ey)} `;
+  }
+  return `${d}Z`;
+}
+
 // Returns rough drawables for roughjs-drawn types; empty for freedraw / text.
 export function getDrawables(el) {
   const cached = drawableCache.get(el);
@@ -75,12 +126,25 @@ export function getDrawables(el) {
   let drawables = [];
   switch (el.type) {
     case "rectangle":
-      if (b.w >= 1 && b.h >= 1)
-        drawables = [generator.rectangle(b.x, b.y, b.w, b.h, opts)];
+      if (b.w >= 1 && b.h >= 1) {
+        const radius = el.borderRadius ?? 0;
+        drawables = [
+          radius > 0
+            ? generator.path(roundedRectPath(b.x, b.y, b.w, b.h, radius), opts)
+            : generator.rectangle(b.x, b.y, b.w, b.h, opts),
+        ];
+      }
       break;
     case "diamond":
-      if (b.w >= 1 && b.h >= 1)
-        drawables = [generator.polygon(diamondPoints(b), opts)];
+      if (b.w >= 1 && b.h >= 1) {
+        const radius = el.borderRadius ?? 0;
+        const pts = diamondPoints(b);
+        drawables = [
+          radius > 0
+            ? generator.path(roundedPolygonPath(pts, radius), opts)
+            : generator.polygon(pts, opts),
+        ];
+      }
       break;
     case "ellipse":
       if (b.w >= 1 && b.h >= 1)
