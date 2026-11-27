@@ -1,7 +1,7 @@
 import { Menu, Star, X } from "lucide-react";
 import { useState } from "react";
 import { FaSquareGithub } from "react-icons/fa6";
-import { useGitHubStars } from "../hooks/useGithubStars";
+import { useGitHubStars } from "../hooks/useGitHubStars";
 import Button from "../components/Button";
 
 function formatStars(count) {
