@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://drawdesign.vercel.app/sitemap.xml
