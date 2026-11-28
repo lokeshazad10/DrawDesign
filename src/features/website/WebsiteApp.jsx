@@ -81,7 +81,7 @@ const useCases = [
 export default function WebsiteApp() {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "DrawDesign — Make room for ideas";
+    document.title = "DrawDesign | Free Online Whiteboard for Diagrams & Ideas";
     return () => {
       document.title = previousTitle;
     };

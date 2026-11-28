@@ -28,7 +28,7 @@ export default function App() {
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Sketchboard | DrawDesign";
+    document.title = "Free Online Whiteboard & Diagram Maker | DrawDesign";
     document.body.classList.add(...boardBodyClasses);
     return () => {
       document.title = previousTitle;
