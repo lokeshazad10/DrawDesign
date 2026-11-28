@@ -105,7 +105,7 @@ export default function TopBar({ board, onExport, onHelp, onToast }) {
         >
           <Menu size={18} />
           <span className="font-(family-name:--font-display) text-[16px] font-bold tracking-[-0.01em] max-[720px]:hidden">
-            Sketchboard
+            DrawDesign
           </span>
         </button>
         {open && (
