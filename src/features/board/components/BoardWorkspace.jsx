@@ -25,7 +25,7 @@ export default function BoardWorkspace({ board, onExport, onHelp, onToast }) {
 
       {elements.length === 0 && !editing && (
         <div className="pointer-events-none absolute left-1/2 top-[46%] max-w-85 -translate-x-1/2 -translate-y-1/2 text-center text-(--muted)">
-          <h1 className="mb-1.5 mt-0 font-(family-name:--font-display) text-[22px] font-bold text-(--text) opacity-[0.85]">
+          <h1 className="mb-1.5 mt-0 font-(family-name:--font-display) text-[22px] font-bold text-[#1b1f27] opacity-[0.85]">
             Your board is empty
           </h1>
           <p className="m-0 text-[14px]">
